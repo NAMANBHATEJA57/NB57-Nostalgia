@@ -3,8 +3,14 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { verifySession } from '@/lib/session';
 
 export async function updateItem(id: string, formData: FormData) {
+  const session = await verifySession();
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
   const name = formData.get('name') as string;
   const askingPriceStr = formData.get('askingPrice') as string;
   const askingPrice = askingPriceStr ? parseFloat(askingPriceStr) : null;

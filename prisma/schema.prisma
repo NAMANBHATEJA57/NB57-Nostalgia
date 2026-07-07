@@ -18,56 +18,56 @@ model User {
 }
 
 model Category {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String
-  description String?
-  bannerImage String?
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  name           String
+  description    String?
+  bannerImage    String?
   thumbnailImage String?
-  icon        String?
-  sortOrder   Int      @default(0)
-  featured    Boolean  @default(false)
-  items       Item[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  icon           String?
+  sortOrder      Int      @default(0)
+  featured       Boolean  @default(false)
+  items          Item[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Tag {
-  id        String   @id @default(cuid())
-  slug      String   @unique
+  id        String    @id @default(cuid())
+  slug      String    @unique
   name      String
   items     ItemTag[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model ItemTag {
   itemId String
   tagId  String
-  item   Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([itemId, tagId])
 }
 
 model Item {
-  id               String   @id @default(cuid())
-  sku              String   @unique // Auto-generated NB57-XXXX
-  slug             String   @unique
-  name             String
-  description      String   @db.Text
-  specifications   String?  @db.Text
-  privateNotes     String?  @db.Text
-  categoryId       String
-  category         Category @relation(fields: [categoryId], references: [id])
-  subcategory      String?
-  series           String?
-  character        String?
-  manufacturer     String?
-  releaseYear      Int?
-  condition        String
-  availability     String   @default("Available") // Available, Reserved, Sold, Not for Sale
-  
+  id             String   @id @default(cuid())
+  sku            String   @unique // Auto-generated NB57-XXXX
+  slug           String   @unique
+  name           String
+  description    String   @db.Text
+  specifications String?  @db.Text
+  privateNotes   String?  @db.Text
+  categoryId     String
+  category       Category @relation(fields: [categoryId], references: [id])
+  subcategory    String?
+  series         String?
+  character      String?
+  manufacturer   String?
+  releaseYear    Int?
+  condition      String
+  availability   String   @default("Available") // Available, Reserved, Sold, Not for Sale
+
   // Pricing
   askingPrice      Float?
   fairValueMin     Float?
@@ -76,47 +76,48 @@ model Item {
   lowestSeenPrice  Float?
   priceConfidence  String?
   priceSource      String?
-  
-  // Purchase Info
-  purchasePrice    Float?
-  purchaseDate     DateTime?
-  
-  // Sales Info (for Sold items)
-  soldPrice        Float?
-  soldDate         DateTime?
-  soldTo           String?
-  
-  notes            String?  @db.Text
-  
-  // Flags
-  featured         Boolean  @default(false)
-  showOnHomepage   Boolean  @default(false)
-  trending         Boolean  @default(false)
-  recentlyAdded    Boolean  @default(false)
-  hideFromPublic   Boolean  @default(false)
-  sealed           Boolean  @default(false)
-  rare             Boolean  @default(false)
-  limited          Boolean  @default(false)
-  promo            Boolean  @default(false)
-  duplicate        Boolean  @default(false)
-  hidden           Boolean  @default(false)
-  
-  quantity         Int      @default(1)
-  coverImage       String
-  
-  // SEO
-  metaTitle        String?
-  metaDescription  String?
-  openGraphImage   String?
-  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
 
-  images           Image[]
-  itemTags         ItemTag[]
-  priceHistory     PriceHistory[]
-  views            ItemView[]
-  sales            Sale[]
+  // Purchase Info
+  purchasePrice Float?
+  purchaseDate  DateTime?
+
+  // Sales Info (for Sold items)
+  soldPrice Float?
+  soldDate  DateTime?
+  soldTo    String?
+
+  notes String? @db.Text
+
+  // Flags
+  featured       Boolean @default(false)
+  showOnHomepage Boolean @default(false)
+  trending       Boolean @default(false)
+  recentlyAdded  Boolean @default(false)
+  hideFromPublic Boolean @default(false)
+  sealed         Boolean @default(false)
+  rare           Boolean @default(false)
+  limited        Boolean @default(false)
+  promo          Boolean @default(false)
+  duplicate      Boolean @default(false)
+  hidden         Boolean @default(false)
+
+  quantity   Int    @default(1)
+  coverImage String
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  openGraphImage  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images       Image[]
+  itemTags     ItemTag[]
+  priceHistory PriceHistory[]
+  views        ItemView[]
+  sales        Sale[]
+  blogPosts    BlogRelatedItem[]
 }
 
 model Image {
@@ -132,13 +133,13 @@ model Image {
 }
 
 model PriceHistory {
-  id          String   @id @default(cuid())
-  itemId      String
-  item        Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  price       Float
-  date        DateTime @default(now())
-  source      String?
-  notes       String?
+  id     String   @id @default(cuid())
+  itemId String
+  item   Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  price  Float
+  date   DateTime @default(now())
+  source String?
+  notes  String?
 }
 
 model ItemView {
@@ -150,11 +151,113 @@ model ItemView {
 }
 
 model Sale {
+  id        String   @id @default(cuid())
+  itemId    String
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  salePrice Float
+  saleDate  DateTime @default(now())
+  platform  String?
+  notes     String?
+}
+
+// Blog System Models
+
+model BlogCategory {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  name        String
+  description String?    @db.Text
+  posts       BlogPost[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model BlogTag {
+  id        String        @id @default(cuid())
+  slug      String        @unique
+  name      String
+  posts     BlogPostTag[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model BlogPost {
+  id            String  @id @default(cuid())
+  title         String
+  slug          String  @unique
+  excerpt       String? @db.Text
+  content       String  @db.Text // HTML from Tiptap
+  featuredImage String?
+  author        String  @default("NB57's Nostalgia")
+
+  // Settings & SEO
+  status         String  @default("Draft") // Draft, Published, Scheduled
+  featured       Boolean @default(false)
+  pinned         Boolean @default(false)
+  readingTime    Int?
+  seoTitle       String?
+  seoDescription String? @db.Text
+  focusKeyword   String?
+  schemaType     String  @default("Article") // Article, How-To, Guide, Collection, Review
+  canonicalUrl   String?
+  openGraphImage String?
+  twitterImage   String?
+  estimatedDifficulty String?
+
+  // Metrics
+  views Int @default(0)
+
+  // Relations
+  categoryId String
+  category   BlogCategory @relation(fields: [categoryId], references: [id])
+
+  tags           BlogPostTag[]
+  relatedItems   BlogRelatedItem[]
+  relatedPosts   BlogRelatedPost[] @relation("RelatedPostSource")
+  relatedByPosts BlogRelatedPost[] @relation("RelatedPostTarget")
+  comments       BlogComment[]
+
+  // Timestamps
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model BlogPostTag {
+  postId String
+  tagId  String
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+
+model BlogRelatedItem {
+  postId String
+  itemId String
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  item   Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([postId, itemId])
+}
+
+model BlogRelatedPost {
+  sourcePostId String
+  targetPostId String
+  sourcePost   BlogPost @relation("RelatedPostSource", fields: [sourcePostId], references: [id], onDelete: Cascade)
+  targetPost   BlogPost @relation("RelatedPostTarget", fields: [targetPostId], references: [id], onDelete: Cascade)
+
+  @@id([sourcePostId, targetPostId])
+}
+
+model BlogComment {
   id          String   @id @default(cuid())
-  itemId      String
-  item        Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  salePrice   Float
-  saleDate    DateTime @default(now())
-  platform    String?
-  notes       String?
+  postId      String
+  post        BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorName  String
+  authorEmail String?
+  content     String   @db.Text
+  approved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

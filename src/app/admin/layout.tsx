@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { LayoutDashboard, Package, Tag, Settings, Image as ImageIcon, Plus } from "lucide-react";
+import { LayoutDashboard, Package, Tag, Settings, Image as ImageIcon, Plus, PenTool, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KeyboardShortcuts } from "@/components/admin/KeyboardShortcuts";
+import { logout } from "@/app/login/actions";
 
 export default function AdminLayout({
   children,
@@ -37,11 +38,21 @@ export default function AdminLayout({
             <ImageIcon className="mr-2 h-4 w-4" />
             Images
           </Button>
+          <Button variant="ghost" className="w-full justify-start" render={<Link href="/admin/blog" />}>
+            <PenTool className="mr-2 h-4 w-4" />
+            Blog
+          </Button>
         </nav>
         <div className="p-4 border-t">
-          <Button variant="outline" className="w-full" render={<Link href="/" />}>
+          <Button variant="outline" className="w-full mb-2" render={<Link href="/" />}>
             View Site
           </Button>
+          <form action={logout}>
+            <Button variant="ghost" className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 justify-start" type="submit">
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </form>
         </div>
       </aside>
 

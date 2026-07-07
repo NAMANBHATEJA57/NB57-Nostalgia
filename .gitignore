@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+#csv
+NB57_20_Blog_Articles.csv
+NB57_Nostalgia_Master_Inventory_v1.csv
+NB57_Blog_Seed_Content.csv

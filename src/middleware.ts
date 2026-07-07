@@ -1,24 +1,19 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { decrypt } from '@/lib/session';
 
-export function middleware(request: NextRequest) {
-  const basicAuth = request.headers.get('authorization');
+export async function middleware(request: NextRequest) {
+  const sessionCookie = request.cookies.get('session')?.value;
+  const payload = await decrypt(sessionCookie);
 
-  if (basicAuth) {
-    const authValue = basicAuth.split(' ')[1];
-    const [user, pwd] = atob(authValue).split(':');
-
-    if (user === 'NB' && pwd === 'Admin@user1234') {
-      return NextResponse.next();
-    }
+  // If there is no valid session payload (invalid/expired JWT)
+  if (!payload?.userId) {
+    // Redirect to login page
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  return new NextResponse('Auth required', {
-    status: 401,
-    headers: {
-      'WWW-Authenticate': 'Basic realm="Secure Area"',
-    },
-  });
+  // If valid, allow request to proceed
+  return NextResponse.next();
 }
 
 export const config = {

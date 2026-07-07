@@ -2,8 +2,12 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { verifySession } from '@/lib/session';
 
 export async function deleteItem(id: string) {
+  const session = await verifySession();
+  if (!session) return { success: false, error: 'Unauthorized' };
+
   try {
     await prisma.item.delete({
       where: { id },
@@ -20,6 +24,9 @@ export async function deleteItem(id: string) {
 }
 
 export async function deleteItems(ids: string[]) {
+  const session = await verifySession();
+  if (!session) return { success: false, error: 'Unauthorized' };
+
   try {
     await prisma.item.deleteMany({
       where: {
@@ -40,6 +47,9 @@ export async function deleteItems(ids: string[]) {
 }
 
 export async function duplicateItem(id: string) {
+  const session = await verifySession();
+  if (!session) return { success: false, error: 'Unauthorized' };
+
   try {
     const itemToDuplicate = await prisma.item.findUnique({
       where: { id },
