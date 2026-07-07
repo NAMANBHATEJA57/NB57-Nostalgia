@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  bannerImage String?
+  thumbnailImage String?
+  icon        String?
+  sortOrder   Int      @default(0)
+  featured    Boolean  @default(false)
+  items       Item[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  items     ItemTag[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ItemTag {
+  itemId String
+  tagId  String
+  item   Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, tagId])
+}
+
+model Item {
+  id               String   @id @default(cuid())
+  sku              String   @unique // Auto-generated NB57-XXXX
+  slug             String   @unique
+  name             String
+  description      String   @db.Text
+  specifications   String?  @db.Text
+  privateNotes     String?  @db.Text
+  categoryId       String
+  category         Category @relation(fields: [categoryId], references: [id])
+  subcategory      String?
+  series           String?
+  character        String?
+  manufacturer     String?
+  releaseYear      Int?
+  condition        String
+  availability     String   @default("Available") // Available, Reserved, Sold, Not for Sale
+  
+  // Pricing
+  askingPrice      Float?
+  fairValueMin     Float?
+  fairValueMax     Float?
+  highestSeenPrice Float?
+  lowestSeenPrice  Float?
+  priceConfidence  String?
+  priceSource      String?
+  
+  // Purchase Info
+  purchasePrice    Float?
+  purchaseDate     DateTime?
+  
+  // Sales Info (for Sold items)
+  soldPrice        Float?
+  soldDate         DateTime?
+  soldTo           String?
+  
+  notes            String?  @db.Text
+  
+  // Flags
+  featured         Boolean  @default(false)
+  showOnHomepage   Boolean  @default(false)
+  trending         Boolean  @default(false)
+  recentlyAdded    Boolean  @default(false)
+  hideFromPublic   Boolean  @default(false)
+  sealed           Boolean  @default(false)
+  rare             Boolean  @default(false)
+  limited          Boolean  @default(false)
+  promo            Boolean  @default(false)
+  duplicate        Boolean  @default(false)
+  hidden           Boolean  @default(false)
+  
+  quantity         Int      @default(1)
+  coverImage       String
+  
+  // SEO
+  metaTitle        String?
+  metaDescription  String?
+  openGraphImage   String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  images           Image[]
+  itemTags         ItemTag[]
+  priceHistory     PriceHistory[]
+  views            ItemView[]
+  sales            Sale[]
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  url       String
+  publicId  String
+  itemId    String
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  type      String   @default("Extra") // Cover, Front, Back, Packaging, Damage, Extra
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PriceHistory {
+  id          String   @id @default(cuid())
+  itemId      String
+  item        Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  price       Float
+  date        DateTime @default(now())
+  source      String?
+  notes       String?
+}
+
+model ItemView {
+  id        String   @id @default(cuid())
+  itemId    String
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime @default(now())
+  ipAddress String?
+}
+
+model Sale {
+  id          String   @id @default(cuid())
+  itemId      String
+  item        Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  salePrice   Float
+  saleDate    DateTime @default(now())
+  platform    String?
+  notes       String?
+}
