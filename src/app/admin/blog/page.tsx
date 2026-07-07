@@ -2,21 +2,34 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Plus, Eye, Edit, Trash, Copy, CheckCircle2, XCircle } from "lucide-react";
+import { FileText, Plus, Eye, Edit, Trash } from "lucide-react";
 import Image from "next/image";
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminBlogDashboard() {
-  const posts = await prisma.blogPost.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { category: true }
-  });
+  // ✅ Parallel fetch — posts (without content) + counts
+  const [posts, publishedCount, draftsCount, totalViews] = await Promise.all([
+    prisma.blogPost.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        featuredImage: true,
+        status: true,
+        views: true,
+        createdAt: true,
+        category: { select: { name: true, slug: true } }
+      }
+    }),
+    prisma.blogPost.count({ where: { status: 'Published' } }),
+    prisma.blogPost.count({ where: { status: 'Draft' } }),
+    prisma.blogPost.aggregate({ _sum: { views: true } })
+  ]);
 
   const totalArticles = posts.length;
-  const publishedCount = posts.filter(p => p.status === 'Published').length;
-  const draftsCount = posts.filter(p => p.status === 'Draft').length;
-  const totalViews = posts.reduce((sum, p) => sum + p.views, 0);
+  const totalViewsCount = totalViews._sum.views || 0;
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -49,7 +62,7 @@ export default async function AdminBlogDashboard() {
         </div>
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="text-slate-500 text-sm font-medium mb-2">Total Views</div>
-          <div className="text-3xl font-bold font-mono text-blue-600">{totalViews}</div>
+          <div className="text-3xl font-bold font-mono text-blue-600">{totalViewsCount}</div>
         </div>
       </div>
 
@@ -73,7 +86,7 @@ export default async function AdminBlogDashboard() {
                   <td className="p-4 flex items-center gap-4">
                     <div className="w-16 h-12 relative rounded bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
                       {post.featuredImage ? (
-                        <Image src={post.featuredImage} alt={post.title} fill className="object-cover" />
+                        <Image src={post.featuredImage} alt={post.title} fill sizes="64px" className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-300">
                           <FileText className="w-5 h-5" />

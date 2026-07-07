@@ -3,7 +3,11 @@
 import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { Search } from "lucide-react";
-import { FloatingSearch } from "../ui/FloatingSearch";
+import dynamic from 'next/dynamic';
+
+const FloatingSearch = dynamic(() => import('../ui/FloatingSearch').then(mod => mod.FloatingSearch), {
+  ssr: false,
+});
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);

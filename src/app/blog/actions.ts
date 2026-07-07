@@ -8,7 +8,17 @@ export async function getMorePosts(skip: number, take: number = 9, excludeId?: s
       status: 'Published',
       id: excludeId ? { not: excludeId } : undefined
     },
-    include: { category: true },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      featuredImage: true,
+      author: true,
+      readingTime: true,
+      publishedAt: true,
+      category: { select: { name: true, slug: true } }
+    },
     orderBy: { publishedAt: 'desc' },
     skip,
     take

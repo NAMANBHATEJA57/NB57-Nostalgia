@@ -2,27 +2,21 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { getHomepageItems, getCategoriesWithCounts, getStatistics } from "@/lib/data";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
+import { Suspense } from "react";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export default async function Home() {
-  const items = await prisma.item.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 10,
-    include: { category: true }
-  });
-
-  const categories = await prisma.category.findMany({
-    include: { _count: { select: { items: true } } }
-  });
-
-  const totalItems = await prisma.item.count();
-  const sealedItems = await prisma.item.count({ where: { sealed: true } });
-  const soldItems = await prisma.item.count({ where: { availability: 'Sold' } });
+  // ✅ Parallel fetch — all 3 queries run simultaneously
+  const [items, categories, { totalItems, sealedItems, soldItems }] = await Promise.all([
+    getHomepageItems(),
+    getCategoriesWithCounts(),
+    getStatistics()
+  ]);
 
   const featuredItems = items.filter(i => i.featured || i.sealed).slice(0, 3);
 
@@ -31,6 +25,7 @@ export default async function Home() {
     if (lower.includes('pokemon')) return 'https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?q=80&w=800';
     if (lower.includes('yu-gi-oh')) return 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjwAcOcJ7LT2lQqGYZjnTXzjZK4rwlcvQW3IO8JpZWPhm8Z3_LPVQ2CO5b&s=10';
     if (lower.includes('ben 10')) return 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyR6SW8d1bUW7wbpuQ8ozxb_G-91JlqfAfG7jXWs0K3Qty9Yf78gyyKCMz&s=10';
+    if (lower.includes('bakugan')) return 'https://images.unsplash.com/photo-1618218168350-6e7c81151b64?q=80&w=800';
     return 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800';
   };
 
@@ -85,8 +80,8 @@ export default async function Home() {
           </div>
         </div>
         
-        <div className="flex justify-center gap-4 md:gap-6">
-          {categories.slice(0, 4).map((category) => (
+        <div className="flex justify-center flex-wrap gap-4 md:gap-6">
+          {categories.slice(0, 8).map((category, index) => (
             <Link href={`/collection?filter=${category.name.toLowerCase()}`} key={category.id} className="w-[320px] shrink group block cursor-pointer">
               <div className="relative aspect-square rounded-3xl overflow-hidden bg-slate-100 shadow-sm group-hover:shadow-xl transition-all duration-500 ease-out group-hover:-translate-y-2">
                 <div className="absolute inset-0">
@@ -94,6 +89,8 @@ export default async function Home() {
                     src={category.thumbnailImage || getCategoryFallbackImage(category.name)} 
                     alt={category.name} 
                     fill 
+                    sizes="320px"
+                    priority={index < 2}
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                   />
                 </div>
@@ -115,89 +112,95 @@ export default async function Home() {
       </section>
 
       {/* Recently Added (Horizontal Scroll) */}
-      <section className="py-32 bg-white overflow-hidden border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 mb-16">
-          <h2 className="font-cormorant text-4xl md:text-5xl font-bold tracking-tight mb-4">New Additions</h2>
-          <p className="text-slate-500 font-light text-lg">The latest items accessioned into the archive.</p>
-        </div>
-        
-        <div className="flex overflow-x-auto pb-12 px-6 gap-6 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none' }}>
-          {items.map((item) => (
-            <Link href={`/collection/${item.slug}`} key={item.id} className="snap-center shrink-0 w-[280px] sm:w-[320px] group block cursor-pointer">
-              <div className="aspect-square relative rounded-2xl overflow-hidden bg-slate-100 mb-6 shadow-sm group-hover:shadow-md transition-all duration-500 ease-out group-hover:-translate-y-1">
-                <Image 
-                  src={item.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
-                  alt={item.name} 
-                  fill 
-                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
-                />
-                <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl"></div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-start">
-                  <div className="text-xs font-medium text-slate-500 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
-                  {item.availability === 'Sold' ? (
-                    <Badge variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-100">Sold</Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">Available</Badge>
-                  )}
+      <Suspense fallback={<div className="py-32 bg-white border-t border-slate-100" />}>
+        <section className="py-32 bg-white overflow-hidden border-t border-slate-100">
+          <div className="max-w-7xl mx-auto px-6 mb-16">
+            <h2 className="font-cormorant text-4xl md:text-5xl font-bold tracking-tight mb-4">New Additions</h2>
+            <p className="text-slate-500 font-light text-lg">The latest items accessioned into the archive.</p>
+          </div>
+          
+          <div className="flex overflow-x-auto pb-12 px-6 gap-6 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none' }}>
+            {items.map((item) => (
+              <Link href={`/collection/${item.slug}`} key={item.id} className="snap-center shrink-0 w-[280px] sm:w-[320px] group block cursor-pointer">
+                <div className="aspect-square relative rounded-2xl overflow-hidden bg-slate-100 mb-6 shadow-sm group-hover:shadow-md transition-all duration-500 ease-out group-hover:-translate-y-1">
+                  <Image 
+                    src={item.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
+                    alt={item.name} 
+                    fill 
+                    sizes="320px"
+                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
+                  />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl"></div>
                 </div>
-                <h3 className="font-medium text-lg leading-snug line-clamp-2 text-slate-900 group-hover:text-blue-600 transition-colors">{item.name}</h3>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-sm text-slate-500">{item.condition}</span>
-                  <span className="font-medium text-slate-900">{item.askingPrice ? `₹${item.askingPrice.toLocaleString()}` : 'N/A'}</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div className="text-xs font-medium text-slate-500 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
+                    {item.availability === 'Sold' ? (
+                      <Badge variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-100">Sold</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">Available</Badge>
+                    )}
+                  </div>
+                  <h3 className="font-medium text-lg leading-snug line-clamp-2 text-slate-900 group-hover:text-blue-600 transition-colors">{item.name}</h3>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-sm text-slate-500">{item.condition}</span>
+                    <span className="font-medium text-slate-900">{item.askingPrice ? `₹${item.askingPrice.toLocaleString()}` : 'N/A'}</span>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </Suspense>
 
       {/* All Selection (Horizontal Scroll) */}
-      <section className="py-32 bg-[#FAFAF8] overflow-hidden border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h2 className="font-cormorant text-4xl md:text-5xl font-bold tracking-tight mb-4">All Selection</h2>
-            <p className="text-slate-500 font-light text-lg">Browse through our entire curated archive.</p>
-          </div>
-          <Link href="/collection">
-            <Button variant="outline" className="rounded-full px-8 h-12 text-base border-slate-300 hover:bg-slate-100 transition-all">
-              View All Collection
-            </Button>
-          </Link>
-        </div>
-        
-        <div className="flex overflow-x-auto pb-12 px-6 gap-6 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none' }}>
-          {items.slice().reverse().map((item) => (
-            <Link href={`/collection/${item.slug}`} key={item.id} className="snap-center shrink-0 w-[280px] sm:w-[320px] group block cursor-pointer">
-              <div className="aspect-square relative rounded-2xl overflow-hidden bg-white mb-6 shadow-sm group-hover:shadow-md transition-all duration-500 ease-out group-hover:-translate-y-1">
-                <Image 
-                  src={item.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
-                  alt={item.name} 
-                  fill 
-                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
-                />
-                <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl"></div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-start">
-                  <div className="text-xs font-medium text-slate-500 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
-                  {item.availability === 'Sold' ? (
-                    <Badge variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-100">Sold</Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">Available</Badge>
-                  )}
-                </div>
-                <h3 className="font-medium text-lg leading-snug line-clamp-2 text-slate-900 group-hover:text-blue-600 transition-colors">{item.name}</h3>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-sm text-slate-500">{item.condition}</span>
-                  <span className="font-medium text-slate-900">{item.askingPrice ? `₹${item.askingPrice.toLocaleString()}` : 'N/A'}</span>
-                </div>
-              </div>
+      <Suspense fallback={<div className="py-32 bg-[#FAFAF8] border-t border-slate-100" />}>
+        <section className="py-32 bg-[#FAFAF8] overflow-hidden border-t border-slate-100">
+          <div className="max-w-7xl mx-auto px-6 mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <h2 className="font-cormorant text-4xl md:text-5xl font-bold tracking-tight mb-4">All Selection</h2>
+              <p className="text-slate-500 font-light text-lg">Browse through our entire curated archive.</p>
+            </div>
+            <Link href="/collection">
+              <Button variant="outline" className="rounded-full px-8 h-12 text-base border-slate-300 hover:bg-slate-100 transition-all">
+                View All Collection
+              </Button>
             </Link>
-          ))}
-        </div>
-      </section>
+          </div>
+          
+          <div className="flex overflow-x-auto pb-12 px-6 gap-6 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none' }}>
+            {items.slice().reverse().map((item) => (
+              <Link href={`/collection/${item.slug}`} key={item.id} className="snap-center shrink-0 w-[280px] sm:w-[320px] group block cursor-pointer">
+                <div className="aspect-square relative rounded-2xl overflow-hidden bg-white mb-6 shadow-sm group-hover:shadow-md transition-all duration-500 ease-out group-hover:-translate-y-1">
+                  <Image 
+                    src={item.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
+                    alt={item.name} 
+                    fill 
+                    sizes="320px"
+                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
+                  />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div className="text-xs font-medium text-slate-500 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
+                    {item.availability === 'Sold' ? (
+                      <Badge variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-100">Sold</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">Available</Badge>
+                    )}
+                  </div>
+                  <h3 className="font-medium text-lg leading-snug line-clamp-2 text-slate-900 group-hover:text-blue-600 transition-colors">{item.name}</h3>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-sm text-slate-500">{item.condition}</span>
+                    <span className="font-medium text-slate-900">{item.askingPrice ? `₹${item.askingPrice.toLocaleString()}` : 'N/A'}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </Suspense>
 
       <Footer />
     </div>

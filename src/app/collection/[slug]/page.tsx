@@ -1,35 +1,74 @@
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft, BoxSelect, CheckCircle2, AlertCircle, Info } from 'lucide-react';
-import { ImageGallery } from '@/components/ui/ImageGallery';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import { Suspense } from 'react';
+import { getItemBySlug, getRelatedItems } from '@/lib/data';
 
-export const dynamic = 'force-dynamic';
+const ImageGallery = dynamic(() => import('@/components/ui/ImageGallery').then(mod => mod.ImageGallery), {
+  ssr: true,
+});
+
+export const revalidate = 86400;
+
+// Shared item fetch for metadata + page (React.cache dedup)
+async function getItem(slug: string) {
+  const item = await getItemBySlug(slug);
+  if (!item) notFound();
+  return item;
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const item = await getItem(slug);
+  return {
+    title: `${item.name} — NB57's Nostalgia`,
+    description: item.description?.slice(0, 160) || `View ${item.name} in NB57's Nostalgia collection.`,
+  };
+}
+
+// Related items as a separate async component for streaming
+async function RelatedItems({ categoryId, excludeId, categoryName }: { categoryId: string; excludeId: string; categoryName: string }) {
+  const relatedItems = await getRelatedItems(categoryId, excludeId);
+  
+  if (relatedItems.length === 0) return null;
+
+  return (
+    <div className="max-w-7xl mx-auto px-6 mt-32 pt-16 border-t border-slate-200">
+      <h2 className="font-cormorant text-3xl font-bold mb-8">Related Collectibles</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {relatedItems.map(related => (
+          <Link href={`/collection/${related.slug}`} key={related.id} className="group cursor-pointer">
+            <div className="aspect-square relative rounded-2xl overflow-hidden bg-slate-100 mb-4 shadow-sm group-hover:shadow-md transition-all duration-500 ease-out group-hover:-translate-y-1">
+              <Image 
+                src={related.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
+                alt={related.name} 
+                fill 
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
+              />
+              <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl"></div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">{categoryName}</div>
+              <h3 className="font-medium text-base leading-snug line-clamp-1 text-slate-900 group-hover:text-blue-600 transition-colors duration-300">{related.name}</h3>
+              <div className="text-sm text-slate-500 font-mono">{related.askingPrice ? `₹${related.askingPrice.toLocaleString()}` : 'Value on Request'}</div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default async function CollectionItemPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const item = await prisma.item.findUnique({
-    where: { slug },
-    include: {
-      category: true,
-      images: { orderBy: { order: 'asc' } },
-      itemTags: { include: { tag: true } }
-    }
-  });
-
-  if (!item) {
-    notFound();
-  }
-
-  const relatedItems = await prisma.item.findMany({
-    where: { categoryId: item.categoryId, id: { not: item.id } },
-    take: 4,
-  });
+  const item = await getItem(slug);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAFAF8] text-slate-900 selection:bg-slate-200">
@@ -209,32 +248,10 @@ export default async function CollectionItemPage({ params }: { params: Promise<{
           </div>
         </div>
 
-        {/* Related Collectibles */}
-        {relatedItems.length > 0 && (
-          <div className="max-w-7xl mx-auto px-6 mt-32 pt-16 border-t border-slate-200">
-            <h2 className="font-cormorant text-3xl font-bold mb-8">Related Collectibles</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedItems.map(related => (
-                <Link href={`/collection/${related.slug}`} key={related.id} className="group cursor-pointer">
-                  <div className="aspect-square relative rounded-2xl overflow-hidden bg-slate-100 mb-4 shadow-sm group-hover:shadow-md transition-all duration-500 ease-out group-hover:-translate-y-1">
-                    <Image 
-                      src={related.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
-                      alt={related.name} 
-                      fill 
-                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
-                    />
-                    <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl"></div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
-                    <h3 className="font-medium text-base leading-snug line-clamp-1 text-slate-900 group-hover:text-blue-600 transition-colors duration-300">{related.name}</h3>
-                    <div className="text-sm text-slate-500 font-mono">{related.askingPrice ? `₹${related.askingPrice.toLocaleString()}` : 'Value on Request'}</div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Related Collectibles — streamed via Suspense */}
+        <Suspense fallback={<div className="max-w-7xl mx-auto px-6 mt-32 pt-16" />}>
+          <RelatedItems categoryId={item.categoryId} excludeId={item.id} categoryName={item.category?.name || 'Uncategorized'} />
+        </Suspense>
       </main>
       
       <Footer />

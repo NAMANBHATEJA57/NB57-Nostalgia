@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useTransition } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Search, Filter, BoxSelect } from "lucide-react";
+import { Search, Filter, BoxSelect, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -18,53 +18,102 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getCollectionItems } from '@/actions/collection';
 
-export function CollectionClient({ items }: { items: any[] }) {
+export function CollectionClient({ 
+  initialItems,
+  initialHasMore,
+  filterOptions,
+  initialFilter,
+  initialSearch
+}: { 
+  initialItems: any[];
+  initialHasMore: boolean;
+  filterOptions: { categories: string[], statuses: string[], conditions: string[] };
+  initialFilter?: string;
+  initialSearch?: string;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const filter = searchParams.get('filter');
+  const [isPending, startTransition] = useTransition();
 
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
+  const [items, setItems] = useState(initialItems);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const [search, setSearch] = useState(initialSearch || "");
+  const [categoryFilter, setCategoryFilter] = useState<string[]>(initialFilter && initialFilter !== 'sealed' ? [initialFilter] : []);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [conditionFilter, setConditionFilter] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
+  
+  // Debounce search update to URL
   useEffect(() => {
-    // Simulate short loading for skeleton effect
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const categories = Array.from(new Set(items.map((item: any) => item.category?.name || 'Uncategorized')));
-  const statuses = Array.from(new Set(items.map((item: any) => item.availability).filter(Boolean)));
-  const conditions = Array.from(new Set(items.map((item: any) => item.condition).filter(Boolean)));
-
-  // Handle URL filters initially
-  useEffect(() => {
-    if (filter) {
-      if (filter === 'sealed') {
-        // Special case for sealed? Wait, sealed is a boolean.
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (search) {
+        params.set('q', search);
       } else {
-        // Find category match (case insensitive)
-        const cat = categories.find(c => c.toLowerCase() === filter.toLowerCase());
-        if (cat) setCategoryFilter([cat]);
+        params.delete('q');
       }
+      
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`);
+      });
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search, pathname, router, searchParams]);
+
+  // When props update (from URL change), reset items
+  useEffect(() => {
+    setItems(initialItems);
+    setHasMore(initialHasMore);
+    setPage(1);
+  }, [initialItems, initialHasMore]);
+
+  const loadMore = async () => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      
+      // Construct filter object same as page.tsx does internally
+      const filters: any = { search };
+      if (categoryFilter.length > 0) filters.category = categoryFilter;
+      if (statusFilter.length > 0) filters.status = statusFilter;
+      if (conditionFilter.length > 0) filters.condition = conditionFilter;
+
+      const { items: newItems, hasMore: more } = await getCollectionItems(nextPage, filters);
+      setItems(prev => [...prev, ...newItems]);
+      setHasMore(more);
+      setPage(nextPage);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingMore(false);
     }
-  }, [filter]); // add filter as dependency but categories is stable enough
+  };
 
+  const handleClearFilters = () => {
+    setSearch("");
+    setCategoryFilter([]);
+    setStatusFilter([]);
+    setConditionFilter([]);
+    router.push(pathname);
+  };
+
+  // We perform local filtering of loaded items until we fully implement server side advanced filters.
+  // The server handles 'q' (search) and 'filter' (single category from URL). 
+  // We can filter the items array locally for the checkboxes for instant feedback.
   const filteredItems = items.filter((item: any) => {
-    // Check if filtering by sealed
-    const matchesSpecialFilter = filter === 'sealed' ? item.sealed === true : true;
-
-    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
-                          item.description?.toLowerCase().includes(search.toLowerCase());
-    
     const catName = item.category?.name || 'Uncategorized';
-    const matchesCategory = categoryFilter.length === 0 || categoryFilter.includes(catName);
+    const matchesCategory = categoryFilter.length === 0 || categoryFilter.includes(catName) || categoryFilter.includes(catName.toLowerCase());
     const matchesStatus = statusFilter.length === 0 || statusFilter.includes(item.availability);
     const matchesCondition = conditionFilter.length === 0 || conditionFilter.includes(item.condition);
 
-    return matchesSearch && matchesCategory && matchesStatus && matchesCondition && matchesSpecialFilter;
+    return matchesCategory && matchesStatus && matchesCondition;
   });
 
   return (
@@ -78,6 +127,11 @@ export function CollectionClient({ items }: { items: any[] }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          {isPending && (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+            </div>
+          )}
         </div>
         
         <DropdownMenu>
@@ -85,10 +139,10 @@ export function CollectionClient({ items }: { items: any[] }) {
             <Filter className="mr-2 h-4 w-4" />
             Filters {(categoryFilter.length > 0 || statusFilter.length > 0 || conditionFilter.length > 0) && <Badge variant="secondary" className="ml-2 rounded-full px-2 py-0">{categoryFilter.length + statusFilter.length + conditionFilter.length}</Badge>}
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 rounded-xl border-slate-200">
+          <DropdownMenuContent align="end" className="w-56 rounded-xl border-slate-200 max-h-96 overflow-y-auto">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="font-medium text-slate-500 text-xs uppercase tracking-wider">Status</DropdownMenuLabel>
-              {statuses.map(status => (
+              {filterOptions.statuses.map(status => (
                 <DropdownMenuCheckboxItem 
                   key={status} 
                   checked={statusFilter.includes(status)}
@@ -102,16 +156,16 @@ export function CollectionClient({ items }: { items: any[] }) {
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuGroup>
-            {statuses.length > 0 && <DropdownMenuSeparator />}
+            {filterOptions.statuses.length > 0 && <DropdownMenuSeparator />}
             <DropdownMenuGroup>
               <DropdownMenuLabel className="font-medium text-slate-500 text-xs uppercase tracking-wider">Collection</DropdownMenuLabel>
-              {categories.map(category => (
+              {filterOptions.categories.map(category => (
                 <DropdownMenuCheckboxItem 
                   key={category} 
-                  checked={categoryFilter.includes(category)}
+                  checked={categoryFilter.includes(category) || categoryFilter.includes(category.toLowerCase())}
                   onCheckedChange={(checked) => {
                     if (checked) setCategoryFilter([...categoryFilter, category]);
-                    else setCategoryFilter(categoryFilter.filter(c => c !== category));
+                    else setCategoryFilter(categoryFilter.filter(c => c !== category && c !== category.toLowerCase()));
                   }}
                   className="rounded-lg cursor-pointer"
                 >
@@ -119,12 +173,12 @@ export function CollectionClient({ items }: { items: any[] }) {
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuGroup>
-            {conditions.length > 0 && (
+            {filterOptions.conditions.length > 0 && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuLabel className="font-medium text-slate-500 text-xs uppercase tracking-wider">Condition</DropdownMenuLabel>
-                  {conditions.map((condition: any) => (
+                  {filterOptions.conditions.map((condition: any) => (
                     <DropdownMenuCheckboxItem 
                       key={condition} 
                       checked={conditionFilter.includes(condition)}
@@ -145,27 +199,17 @@ export function CollectionClient({ items }: { items: any[] }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {loading ? (
-          // Skeletons
-          [...Array(8)].map((_, i) => (
-            <div key={i} className="flex flex-col h-full rounded-2xl overflow-hidden animate-pulse">
-              <div className="aspect-square bg-slate-200"></div>
-              <div className="p-4 space-y-3">
-                <div className="h-3 w-1/3 bg-slate-200 rounded"></div>
-                <div className="h-5 w-3/4 bg-slate-200 rounded"></div>
-                <div className="h-4 w-full bg-slate-200 rounded mt-4"></div>
-              </div>
-            </div>
-          ))
-        ) : filteredItems.length > 0 ? (
+        {filteredItems.length > 0 ? (
           filteredItems.map((item: any) => (
-            <Link href={`/collection/${item.slug}`} key={item.id} className="group h-full cursor-pointer">
+            <Link prefetch={true} href={`/collection/${item.slug}`} key={item.id} className="group h-full cursor-pointer">
               <Card className="h-full flex flex-col overflow-hidden bg-white border border-slate-100/80 shadow-sm transition-all duration-500 ease-out group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-blue-900/5 group-hover:ring-1 group-hover:ring-blue-100 rounded-2xl pt-0">
                 <div className="aspect-square relative overflow-hidden bg-slate-50">
                   <Image 
                     src={item.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
                     alt={item.name}
                     fill
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   />
                   {item.sealed && (
@@ -222,18 +266,28 @@ export function CollectionClient({ items }: { items: any[] }) {
             <Button 
               variant="outline" 
               className="mt-8 rounded-full px-8 border-slate-200 text-slate-600 hover:bg-slate-50"
-              onClick={() => {
-                setSearch("");
-                setCategoryFilter([]);
-                setStatusFilter([]);
-                setConditionFilter([]);
-              }}
+              onClick={handleClearFilters}
             >
               Clear all filters
             </Button>
           </div>
         )}
       </div>
+
+      {hasMore && (
+        <div className="mt-12 flex justify-center">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="rounded-full px-10 h-14 border-slate-300"
+            onClick={loadMore}
+            disabled={isLoadingMore}
+          >
+            {isLoadingMore ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+            {isLoadingMore ? "Loading..." : "Load More Items"}
+          </Button>
+        </div>
+      )}
     </>
   );
 }

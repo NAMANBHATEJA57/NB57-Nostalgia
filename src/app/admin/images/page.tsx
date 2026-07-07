@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
-import { format } from "date-fns";
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +42,7 @@ export default async function ImagesPage() {
                   src={image.url} 
                   alt={image.item.name} 
                   fill 
+                  sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 20vw"
                   className="object-cover transition-transform group-hover:scale-105" 
                 />
               </div>

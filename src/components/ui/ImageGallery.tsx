@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface ImageGalleryProps {
   coverImage: string;
@@ -39,6 +38,7 @@ export function ImageGallery({ coverImage, images, altText }: ImageGalleryProps)
           src={mainImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
           alt={altText}
           fill
+          sizes="(max-width: 1024px) 100vw, 58vw"
           className="object-contain p-8 transition-transform duration-700 group-hover:scale-[1.02]"
           priority
         />
@@ -67,6 +67,7 @@ export function ImageGallery({ coverImage, images, altText }: ImageGalleryProps)
                 src={imgUrl} 
                 alt={`${altText} Thumbnail ${index + 1}`} 
                 fill
+                sizes="80px"
                 className="object-cover"
               />
             </button>
@@ -74,63 +75,55 @@ export function ImageGallery({ coverImage, images, altText }: ImageGalleryProps)
         </div>
       )}
 
-      {/* Lightbox Overlay */}
-      <AnimatePresence>
-        {lightboxOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center"
+      {/* Lightbox Overlay — CSS transitions instead of framer-motion */}
+      {lightboxOpen && (
+        <div 
+          className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center animate-in fade-in duration-200"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button 
+            className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-all active:scale-90"
             onClick={() => setLightboxOpen(false)}
           >
-            <button 
-              className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center text-white/70 hover:text-white transition-all active:scale-90"
-              onClick={() => setLightboxOpen(false)}
-            >
-              <X className="w-8 h-8" />
-            </button>
+            <X className="w-8 h-8" />
+          </button>
 
-            {allImages.length > 1 && (
-              <>
-                <button 
-                  className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all active:scale-90"
-                  onClick={handlePrev}
-                >
-                  <ChevronLeft className="w-8 h-8" />
-                </button>
-                <button 
-                  className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all active:scale-90"
-                  onClick={handleNext}
-                >
-                  <ChevronRight className="w-8 h-8" />
-                </button>
-              </>
-            )}
+          {allImages.length > 1 && (
+            <>
+              <button 
+                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all active:scale-90"
+                onClick={handlePrev}
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+              <button 
+                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all active:scale-90"
+                onClick={handleNext}
+              >
+                <ChevronRight className="w-8 h-8" />
+              </button>
+            </>
+          )}
 
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-6xl h-[80vh]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Image 
-                src={mainImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
-                alt={altText}
-                fill
-                className="object-contain"
-                quality={100}
-              />
-            </motion.div>
-            
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 text-sm font-medium tracking-widest">
-              {currentIndex + 1} / {allImages.length}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div 
+            className="relative w-full max-w-6xl h-[80vh] animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image 
+              src={mainImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
+              alt={altText}
+              fill
+              sizes="(max-width: 1536px) 100vw, 1536px"
+              className="object-contain"
+              quality={90}
+            />
+          </div>
+          
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 text-sm font-medium tracking-widest">
+            {currentIndex + 1} / {allImages.length}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

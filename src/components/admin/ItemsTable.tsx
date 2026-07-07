@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Item, Category } from "@prisma/client";
 import { toast } from "sonner";
 import { deleteItem, deleteItems, duplicateItem } from "@/app/admin/items/actions";
 import { 
@@ -15,10 +14,9 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Filter, Edit, Trash, ExternalLink, Copy } from "lucide-react";
+import { Search, Filter, Edit, Trash, Copy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -40,10 +38,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type ItemWithCategory = Item & { category: Category };
+type ItemTableRow = {
+  id: string;
+  sku: string;
+  slug: string;
+  name: string;
+  coverImage: string;
+  availability: string;
+  condition: string;
+  askingPrice: number | null;
+  fairValueMax?: number | null;
+  series?: string | null;
+  sealed: boolean;
+  featured: boolean;
+  createdAt: Date;
+  category: { name: string } | null;
+};
 
 interface ItemsTableProps {
-  items: ItemWithCategory[];
+  items: ItemTableRow[];
 }
 
 export function ItemsTable({ items: initialItems }: ItemsTableProps) {
@@ -60,7 +73,7 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
       const result = await duplicateItem(id);
       if (result.success && result.item) {
         toast.success("Item duplicated successfully");
-        setItems([result.item as ItemWithCategory, ...items]);
+        setItems([result.item as ItemTableRow, ...items]);
       } else {
         toast.error(result.error || "Failed to duplicate item");
       }
@@ -99,15 +112,15 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
                           item.sku.toLowerCase().includes(search.toLowerCase()) ||
-                          item.category.name.toLowerCase().includes(search.toLowerCase());
+                          (item.category?.name || '').toLowerCase().includes(search.toLowerCase());
     
-    const matchesCategory = categoryFilter.length === 0 || categoryFilter.includes(item.category.name);
+    const matchesCategory = categoryFilter.length === 0 || categoryFilter.includes(item.category?.name || '');
     const matchesStatus = statusFilter.length === 0 || statusFilter.includes(item.availability);
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  const categories = Array.from(new Set(items.map(item => item.category.name)));
+  const categories = Array.from(new Set(items.map(item => item.category?.name || 'Uncategorized')));
   const statuses = Array.from(new Set(items.map(item => item.availability)));
 
   const handleSelectAll = (checked: boolean) => {
@@ -252,7 +265,7 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
                   <TableCell className="font-medium">
                     {item.name}
                   </TableCell>
-                  <TableCell>{item.category.name}</TableCell>
+                  <TableCell>{item.category?.name || 'Uncategorized'}</TableCell>
                   <TableCell className="text-muted-foreground truncate max-w-[150px]">
                     {item.series || "-"}
                   </TableCell>
@@ -263,7 +276,7 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
                     {formatPrice(item.askingPrice)}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {formatPrice(item.fairValueMax)}
+                    {formatPrice(item.fairValueMax ?? null)}
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant={item.availability === "Sold" ? "destructive" : item.availability === "Available" ? "default" : "secondary"}>

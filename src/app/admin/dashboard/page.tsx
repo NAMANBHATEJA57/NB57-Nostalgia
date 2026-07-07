@@ -1,27 +1,31 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, CheckCircle, Tag, DollarSign } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import Image from "next/image";
 
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const totalItems = await prisma.item.count();
-  const availableItems = await prisma.item.count({ where: { availability: "Available" } });
-  const totalCategories = await prisma.category.count();
-  
-  const valueAggregation = await prisma.item.aggregate({
-    _sum: {
-      askingPrice: true,
-    }
-  });
+  // ✅ Parallel fetch — all 5 queries run simultaneously
+  const [totalItems, availableItems, totalCategories, valueAggregation, recentlyAdded] = await Promise.all([
+    prisma.item.count(),
+    prisma.item.count({ where: { availability: "Available" } }),
+    prisma.category.count(),
+    prisma.item.aggregate({ _sum: { askingPrice: true } }),
+    prisma.item.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: {
+        id: true,
+        name: true,
+        coverImage: true,
+        askingPrice: true,
+        category: { select: { name: true } }
+      }
+    })
+  ]);
   
   const estimatedValue = valueAggregation._sum.askingPrice || 0;
-
-  const recentlyAdded = await prisma.item.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-    include: { category: true }
-  });
 
   return (
     <div className="p-8">
@@ -97,8 +101,8 @@ export default async function DashboardPage() {
               <div className="space-y-4">
                 {recentlyAdded.map(item => (
                   <div key={item.id} className="flex items-center gap-4 border-b pb-4 last:border-0 last:pb-0">
-                    <div className="h-10 w-10 rounded overflow-hidden bg-slate-100 flex-shrink-0">
-                      <img src={item.coverImage} alt={item.name} className="w-full h-full object-cover" />
+                    <div className="h-10 w-10 rounded overflow-hidden bg-slate-100 flex-shrink-0 relative">
+                      <Image src={item.coverImage} alt={item.name} fill sizes="40px" className="object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{item.name}</p>

@@ -118,6 +118,12 @@ model Item {
   views        ItemView[]
   sales        Sale[]
   blogPosts    BlogRelatedItem[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([availability])
+  @@index([featured])
+  @@index([createdAt])
 }
 
 model Image {
@@ -130,6 +136,8 @@ model Image {
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([itemId])
 }
 
 model PriceHistory {
@@ -221,6 +229,12 @@ model BlogPost {
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([categoryId])
+  @@index([slug])
+  @@index([featured])
 }
 
 model BlogPostTag {

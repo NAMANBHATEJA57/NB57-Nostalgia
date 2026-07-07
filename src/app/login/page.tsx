@@ -43,14 +43,14 @@ export default function LoginPage() {
         <form onSubmit={onSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700" htmlFor="email">Email</label>
+              <label className="text-sm font-medium text-slate-700" htmlFor="username">Username</label>
               <Input 
-                id="email" 
-                name="email" 
-                type="email" 
+                id="username" 
+                name="username" 
+                type="text" 
                 required 
                 className="h-12"
-                placeholder="admin@nb57.com"
+                placeholder="NB57"
               />
             </div>
             <div className="space-y-2">

@@ -1,32 +1,16 @@
-import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Search } from "lucide-react";
 import BlogListClient from "./BlogListClient";
+import { getBlogHomepageData } from "@/lib/data";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export default async function BlogHomepage() {
-  const featuredPost = await prisma.blogPost.findFirst({
-    where: { status: 'Published', featured: true },
-    include: { category: true },
-    orderBy: { publishedAt: 'desc' }
-  });
-
-  const featuredPostId = featuredPost?.id;
-
-  const initialPosts = await prisma.blogPost.findMany({
-    where: { status: 'Published', id: featuredPostId ? { not: featuredPostId } : undefined },
-    include: { category: true },
-    orderBy: { publishedAt: 'desc' },
-    take: 9
-  });
-
-  const totalCount = await prisma.blogPost.count({
-    where: { status: 'Published', id: featuredPostId ? { not: featuredPostId } : undefined }
-  });
+  // ✅ Single cached function — replaces 3 sequential raw Prisma calls
+  const { featuredPost, initialPosts, totalCount } = await getBlogHomepageData();
 
   const formatDate = (date: Date) => date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -68,6 +52,8 @@ export default async function BlogHomepage() {
                         src={featuredPost.featuredImage} 
                         alt={featuredPost.title} 
                         fill 
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        priority
                         className="object-cover transition-transform duration-700 group-hover:scale-105" 
                       />
                     )}
@@ -99,7 +85,7 @@ export default async function BlogHomepage() {
           <BlogListClient 
             initialPosts={initialPosts} 
             totalCount={totalCount} 
-            featuredPostId={featuredPostId} 
+            featuredPostId={featuredPost?.id} 
           />
           
         </div>

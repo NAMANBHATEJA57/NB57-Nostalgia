@@ -6,15 +6,15 @@ import { createSession, deleteSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 
 export async function login(formData: FormData) {
-  const email = formData.get("email") as string;
+  const username = formData.get("username") as string;
   const password = formData.get("password") as string;
 
-  if (!email || !password) {
-    return { error: "Email and password are required" };
+  if (!username || !password) {
+    return { error: "Username and password are required" };
   }
 
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { email: username },
   });
 
   if (!user) {

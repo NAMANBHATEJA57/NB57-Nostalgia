@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,15 +5,17 @@ import { Metadata, ResolvingMetadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Badge } from "@/components/ui/badge";
+import { getBlogPostBySlug, incrementBlogViews } from "@/lib/data";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400;
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string; category: string }> },
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { slug } = await params;
-  const post = await prisma.blogPost.findUnique({ where: { slug }, include: { category: true } });
+  // ✅ Uses React.cache — this query is deduped with the page component
+  const post = await getBlogPostBySlug(slug);
 
   if (!post) return { title: 'Not Found' };
 
@@ -46,23 +47,15 @@ export async function generateMetadata(
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string; category: string }> }) {
   const { slug } = await params;
 
-  const post = await prisma.blogPost.findUnique({
-    where: { slug },
-    include: { 
-      category: true,
-      tags: { include: { tag: true } }
-    }
-  });
+  // ✅ React.cache dedup — same query as generateMetadata, no duplicate DB call
+  const post = await getBlogPostBySlug(slug);
 
   if (!post || post.status !== 'Published') {
     notFound();
   }
 
-  // Increment views
-  await prisma.blogPost.update({
-    where: { id: post.id },
-    data: { views: { increment: 1 } }
-  });
+  // ✅ Fire-and-forget — view counter does NOT block page render
+  incrementBlogViews(post.id);
 
   const formatDate = (date: Date) => date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -106,7 +99,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         {post.featuredImage && (
           <div className="max-w-5xl mx-auto px-6 mb-16">
             <div className="aspect-[21/9] md:aspect-[2.5/1] relative rounded-3xl overflow-hidden shadow-sm">
-              <Image src={post.featuredImage} alt={post.title} fill className="object-cover" priority />
+              <Image src={post.featuredImage} alt={post.title} fill sizes="(max-width: 1280px) 100vw, 1280px" className="object-cover" priority />
             </div>
           </div>
         )}

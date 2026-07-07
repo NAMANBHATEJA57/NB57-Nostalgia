@@ -39,6 +39,9 @@ export function FloatingSearch({ open, setOpen }: { open: boolean, setOpen: (ope
           <CommandItem onSelect={() => runCommand(() => router.push('/collection?filter=pokemon'))}>
             Pokemon Collection
           </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push('/collection?filter=bakugan'))}>
+            Bakugan Collection
+          </CommandItem>
           <CommandItem onSelect={() => runCommand(() => router.push('/collection?filter=sealed'))}>
             Factory Sealed Items
           </CommandItem>

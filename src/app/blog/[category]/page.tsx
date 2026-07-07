@@ -1,28 +1,23 @@
-import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { notFound } from "next/navigation";
+import { getBlogCategoryData } from "@/lib/data";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export default async function BlogCategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category: categorySlug } = await params;
 
-  const category = await prisma.blogCategory.findUnique({
-    where: { slug: categorySlug }
-  });
+  // ✅ Single cached function — replaces 2 sequential raw Prisma calls
+  const data = await getBlogCategoryData(categorySlug);
 
-  if (!category) {
+  if (!data) {
     notFound();
   }
 
-  const posts = await prisma.blogPost.findMany({
-    where: { categoryId: category.id, status: 'Published' },
-    include: { category: true },
-    orderBy: { publishedAt: 'desc' }
-  });
+  const { category, posts } = data;
 
   const formatDate = (date: Date) => date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -53,6 +48,7 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ c
                       src={post.featuredImage} 
                       alt={post.title} 
                       fill 
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-105" 
                     />
                   )}
