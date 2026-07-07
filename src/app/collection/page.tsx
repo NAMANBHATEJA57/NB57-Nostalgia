@@ -1,6 +1,7 @@
 import Navbar from '@/components/layout/Navbar';
 import { prisma } from '@/lib/prisma';
 import { CollectionClient } from './CollectionClient';
+import { Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,9 @@ export default async function CollectionPage() {
           </p>
         </div>
 
-        <CollectionClient items={items} />
+        <Suspense fallback={<div className="py-20 text-center text-slate-500">Loading collection...</div>}>
+          <CollectionClient items={items} />
+        </Suspense>
       </div>
     </div>
   );

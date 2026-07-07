@@ -1,0 +1,15 @@
+- `[x]` **UX Improvement: Homepage**
+  - `[x]` Remove infinite `animate-slow-spin` from the hero collage
+  - `[x]` Update hover states on cards to `duration-500 ease-out`
+  - `[x]` Adjust text colors for better WCAG contrast
+- `[x]` **UX Improvement: Collection Experience**
+  - `[x]` Refine filter dropdown and search bar touch targets
+  - `[x]` Update item cards hover to 500ms fluid transitions
+  - `[x]` Add blue accent (`text-blue-600`) to hover text
+- `[x]` **UX Improvement: Item Details**
+  - `[x]` Apply `font-mono` to Accession Numbers and pricing data
+  - `[x]` Update "Inquire to Acquire" button with blue accent
+  - `[x]` Match related item cards transition timings
+- `[x]` **UX Improvement: Image Gallery**
+  - `[x]` Increase Lightbox controls touch targets padding
+  - `[x]` Add tactile feedback (`active:scale-90`)
