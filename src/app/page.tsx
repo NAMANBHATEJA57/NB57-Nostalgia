@@ -121,8 +121,8 @@ export default async function Home() {
           
           <div className="flex overflow-x-auto pb-12 px-6 gap-6 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none' }}>
             {items.map((item) => (
-              <Link href={`/collection/${item.slug}`} key={item.id} className="snap-center shrink-0 w-[280px] sm:w-[320px] group block cursor-pointer">
-                <div className="aspect-square relative rounded-2xl overflow-hidden bg-slate-100 mb-6 shadow-sm group-hover:shadow-md transition-all duration-500 ease-out group-hover:-translate-y-1">
+              <Link href={`/collection/${item.slug}`} key={item.id} className="snap-center shrink-0 w-[280px] sm:w-[320px] group flex flex-col cursor-pointer rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-md transition-all duration-300 overflow-hidden">
+                <div className="aspect-square relative bg-slate-100 w-full overflow-hidden">
                   <Image 
                     src={item.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
                     alt={item.name} 
@@ -130,21 +130,28 @@ export default async function Home() {
                     sizes="320px"
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                   />
-                  <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl"></div>
+                  <div className="absolute inset-0 ring-1 ring-inset ring-black/5"></div>
+                  {item.sealed && (
+                    <div className="absolute top-3 left-3 z-10">
+                      <Badge className="bg-amber-100 text-amber-800 border-amber-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm bg-amber-100/90 shadow-sm">Factory Sealed</Badge>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col flex-1 p-5 space-y-3">
                   <div className="flex justify-between items-start">
-                    <div className="text-xs font-medium text-slate-500 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
+                    <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
                     {item.availability === 'Sold' ? (
                       <Badge variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-100">Sold</Badge>
+                    ) : item.availability === 'Reserved' ? (
+                      <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50">Reserved</Badge>
                     ) : (
                       <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">Available</Badge>
                     )}
                   </div>
                   <h3 className="font-medium text-lg leading-snug line-clamp-2 text-slate-900 group-hover:text-blue-600 transition-colors">{item.name}</h3>
-                  <div className="flex justify-between items-center pt-2">
+                  <div className="flex justify-between items-center pt-2 mt-auto">
                     <span className="text-sm text-slate-500">{item.condition}</span>
-                    <span className="font-medium text-slate-900">{item.askingPrice ? `₹${item.askingPrice.toLocaleString()}` : 'N/A'}</span>
+                    <span className="font-medium text-slate-900">{item.askingPrice ? `₹${item.askingPrice.toLocaleString('en-IN')}` : 'Request'}</span>
                   </div>
                 </div>
               </Link>
@@ -170,8 +177,8 @@ export default async function Home() {
           
           <div className="flex overflow-x-auto pb-12 px-6 gap-6 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none' }}>
             {items.slice().reverse().map((item) => (
-              <Link href={`/collection/${item.slug}`} key={item.id} className="snap-center shrink-0 w-[280px] sm:w-[320px] group block cursor-pointer">
-                <div className="aspect-square relative rounded-2xl overflow-hidden bg-white mb-6 shadow-sm group-hover:shadow-md transition-all duration-500 ease-out group-hover:-translate-y-1">
+              <Link href={`/collection/${item.slug}`} key={item.id} className="snap-center shrink-0 w-[280px] sm:w-[320px] group flex flex-col cursor-pointer rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-md transition-all duration-300 overflow-hidden">
+                <div className="aspect-square relative bg-slate-100 w-full overflow-hidden">
                   <Image 
                     src={item.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
                     alt={item.name} 
@@ -179,21 +186,28 @@ export default async function Home() {
                     sizes="320px"
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                   />
-                  <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl"></div>
+                  <div className="absolute inset-0 ring-1 ring-inset ring-black/5"></div>
+                  {item.sealed && (
+                    <div className="absolute top-3 left-3 z-10">
+                      <Badge className="bg-amber-100 text-amber-800 border-amber-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm bg-amber-100/90 shadow-sm">Factory Sealed</Badge>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col flex-1 p-5 space-y-3">
                   <div className="flex justify-between items-start">
-                    <div className="text-xs font-medium text-slate-500 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
+                    <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
                     {item.availability === 'Sold' ? (
                       <Badge variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-100">Sold</Badge>
+                    ) : item.availability === 'Reserved' ? (
+                      <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50">Reserved</Badge>
                     ) : (
                       <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">Available</Badge>
                     )}
                   </div>
                   <h3 className="font-medium text-lg leading-snug line-clamp-2 text-slate-900 group-hover:text-blue-600 transition-colors">{item.name}</h3>
-                  <div className="flex justify-between items-center pt-2">
+                  <div className="flex justify-between items-center pt-2 mt-auto">
                     <span className="text-sm text-slate-500">{item.condition}</span>
-                    <span className="font-medium text-slate-900">{item.askingPrice ? `₹${item.askingPrice.toLocaleString()}` : 'N/A'}</span>
+                    <span className="font-medium text-slate-900">{item.askingPrice ? `₹${item.askingPrice.toLocaleString('en-IN')}` : 'Request'}</span>
                   </div>
                 </div>
               </Link>

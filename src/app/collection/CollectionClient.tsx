@@ -4,7 +4,7 @@ import { useState, useEffect, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+
 import { Badge } from '@/components/ui/badge';
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -198,60 +198,42 @@ export function CollectionClient({
         </DropdownMenu>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredItems.length > 0 ? (
           filteredItems.map((item: any) => (
-            <Link prefetch={true} href={`/collection/${item.slug}`} key={item.id} className="group h-full cursor-pointer">
-              <Card className="h-full flex flex-col overflow-hidden bg-white border border-slate-100/80 shadow-sm transition-all duration-500 ease-out group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-blue-900/5 group-hover:ring-1 group-hover:ring-blue-100 rounded-2xl pt-0">
-                <div className="aspect-square relative overflow-hidden bg-slate-50">
-                  <Image 
-                    src={item.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
-                    alt={item.name}
-                    fill
-                    loading="lazy"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                  />
-                  {item.sealed && (
-                    <div className="absolute top-3 left-3 z-10">
-                      <Badge className="bg-amber-100 text-amber-800 border-amber-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm bg-amber-100/90">Factory Sealed</Badge>
-                    </div>
-                  )}
-                  {item.condition && !item.sealed && (
-                    <div className="absolute top-3 left-3 z-10">
-                      <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm text-slate-700 border-slate-200/50 px-2 py-0.5 font-medium shadow-sm">
-                        {item.condition}
-                      </Badge>
-                    </div>
-                  )}
-                  <div className="absolute top-3 right-3 z-10">
-                    {item.availability === 'Sold' ? (
-                      <Badge variant="secondary" className="bg-slate-800/80 backdrop-blur-sm text-white border-transparent px-2 py-0.5 font-medium shadow-sm">Sold</Badge>
-                    ) : item.availability === 'Reserved' ? (
-                      <Badge variant="secondary" className="bg-yellow-500/80 backdrop-blur-sm text-white border-transparent px-2 py-0.5 font-medium shadow-sm">Reserved</Badge>
-                    ) : (
-                      <Badge variant="secondary" className="bg-emerald-500/80 backdrop-blur-sm text-white border-transparent px-2 py-0.5 font-medium shadow-sm">Available</Badge>
-                    )}
+            <Link prefetch={true} href={`/collection/${item.slug}`} key={item.id} className="group flex flex-col cursor-pointer rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-md transition-all duration-300 overflow-hidden">
+              <div className="aspect-square relative bg-slate-100 w-full overflow-hidden">
+                <Image 
+                  src={item.coverImage || 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800'} 
+                  alt={item.name} 
+                  fill 
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
+                />
+                <div className="absolute inset-0 ring-1 ring-inset ring-black/5"></div>
+                {item.sealed && (
+                  <div className="absolute top-3 left-3 z-10">
+                    <Badge className="bg-amber-100 text-amber-800 border-amber-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm bg-amber-100/90 shadow-sm">Factory Sealed</Badge>
                   </div>
+                )}
+              </div>
+              <div className="flex flex-col flex-1 p-5 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
+                  {item.availability === 'Sold' ? (
+                    <Badge variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-100">Sold</Badge>
+                  ) : item.availability === 'Reserved' ? (
+                    <Badge variant="secondary" className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50">Reserved</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">Available</Badge>
+                  )}
                 </div>
-                
-                <CardHeader className="p-5 pb-3">
-                  <div className="text-[11px] font-semibold text-slate-500 mb-1.5 uppercase tracking-widest">{item.category?.name || 'Uncategorized'}</div>
-                  <h3 className="font-cormorant text-2xl font-bold leading-tight line-clamp-2 text-slate-900 group-hover:text-blue-600 transition-colors duration-300">{item.name}</h3>
-                </CardHeader>
-                
-                <CardFooter className="p-5 pt-3 mt-auto flex justify-between items-center bg-slate-50/50 border-t border-slate-100">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-0.5">Fair Value</span>
-                    <span className="font-medium text-slate-900 text-sm">
-                      {item.askingPrice ? `₹${item.askingPrice.toLocaleString('en-IN')}` : 'Request'}
-                    </span>
-                  </div>
-                  <div className="text-slate-400 opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0">
-                    <BoxSelect className="w-5 h-5" />
-                  </div>
-                </CardFooter>
-              </Card>
+                <h3 className="font-medium text-lg leading-snug line-clamp-2 text-slate-900 group-hover:text-blue-600 transition-colors">{item.name}</h3>
+                <div className="flex justify-between items-center pt-2 mt-auto">
+                  <span className="text-sm text-slate-500">{item.condition}</span>
+                  <span className="font-medium text-slate-900">{item.askingPrice ? `₹${item.askingPrice.toLocaleString('en-IN')}` : 'Request'}</span>
+                </div>
+              </div>
             </Link>
           ))
         ) : (
