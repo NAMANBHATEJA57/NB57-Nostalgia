@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import React, { useState, useEffect } from 'react';
 import { Search } from "lucide-react";
 import dynamic from 'next/dynamic';
@@ -23,10 +24,17 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/70 backdrop-blur-md border-b py-4 shadow-sm' : 'bg-white/0 py-6'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <Link href="/">
-            <h1 className="font-cormorant text-2xl font-bold tracking-tight text-slate-900">NB57's Nostalgia</h1>
+      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 h-[80px] ${scrolled ? 'bg-white/70 backdrop-blur-md border-b shadow-sm' : 'bg-white/0'}`}>
+        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+          <Link href="/" className="flex items-center">
+            <Image 
+              src="/logo.png" 
+              alt="NB57's Nostalgia Logo" 
+              width={140} 
+              height={40} 
+              className="object-contain"
+              priority
+            />
           </Link>
           <div className="flex items-center space-x-8 text-sm font-medium text-slate-700">
             <Link href="/collection" className="hover:text-black transition-colors">Collections</Link>

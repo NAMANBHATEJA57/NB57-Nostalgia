@@ -23,7 +23,6 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold text-slate-900 mb-4">Company</h3>
           <ul className="space-y-3">
-            <li><Link href="#timeline" className="hover:text-black transition-colors">Timeline</Link></li>
             <li><Link href="/blog" className="hover:text-black transition-colors">Blog</Link></li>
           </ul>
         </div>
