@@ -44,6 +44,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       canonicalUrl: body.canonicalUrl === "" ? null : body.canonicalUrl,
       openGraphImage: body.openGraphImage === "" ? null : body.openGraphImage,
       twitterImage: body.twitterImage === "" ? null : body.twitterImage,
+      author: body.author || "NB57's Nostalgia",
+      status: body.status || "Draft",
+      featured: body.featured ?? false,
+      pinned: body.pinned ?? false,
+      schemaType: body.schemaType || "Article",
       // Publish date logic
       publishedAt: body.status === 'Published' && existing.status !== 'Published' ? new Date() : existing.publishedAt,
     };

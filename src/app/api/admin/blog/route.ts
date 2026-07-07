@@ -35,12 +35,17 @@ export async function POST(req: Request) {
     const json = await req.json();
     const body = blogSchema.parse(json);
     
-    // Normalize empty strings for specific URL fields
+    // Normalize empty strings for specific URL fields and apply defaults
     const dataToSave = {
       ...body,
       canonicalUrl: body.canonicalUrl === "" ? null : body.canonicalUrl,
       openGraphImage: body.openGraphImage === "" ? null : body.openGraphImage,
       twitterImage: body.twitterImage === "" ? null : body.twitterImage,
+      author: body.author || "NB57's Nostalgia",
+      status: body.status || "Draft",
+      featured: body.featured ?? false,
+      pinned: body.pinned ?? false,
+      schemaType: body.schemaType || "Article",
       publishedAt: body.status === 'Published' ? new Date() : null,
     };
 

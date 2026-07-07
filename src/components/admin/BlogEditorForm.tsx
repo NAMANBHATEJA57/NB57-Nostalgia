@@ -23,16 +23,16 @@ const blogSchema = z.object({
   excerpt: z.string().optional(),
   content: z.string().min(1, "Content is required"),
   featuredImage: z.string().optional(),
-  author: z.string().default("NB57's Nostalgia"),
-  status: z.enum(["Draft", "Published", "Scheduled"]).default("Draft"),
-  featured: z.boolean().default(false),
-  pinned: z.boolean().default(false),
+  author: z.string().optional(),
+  status: z.enum(["Draft", "Published", "Scheduled"]).optional(),
+  featured: z.boolean().optional(),
+  pinned: z.boolean().optional(),
   readingTime: z.number().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   focusKeyword: z.string().optional(),
   canonicalUrl: z.string().url().optional().or(z.literal("")),
-  schemaType: z.enum(["Article", "How-To", "Guide", "Collection", "Review"]).default("Article"),
+  schemaType: z.enum(["Article", "How-To", "Guide", "Collection", "Review"]).optional(),
   estimatedDifficulty: z.string().optional(),
   openGraphImage: z.string().url().optional().or(z.literal("")),
   twitterImage: z.string().url().optional().or(z.literal("")),
@@ -212,7 +212,7 @@ export function BlogEditorForm({ initialData, categories }: BlogEditorFormProps)
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700">Category <span className="text-red-500">*</span></label>
-            <Select value={form.watch("categoryId")} onValueChange={(val) => form.setValue("categoryId", val)}>
+            <Select value={form.watch("categoryId")} onValueChange={(val) => form.setValue("categoryId", val as string)}>
               <SelectTrigger><SelectValue placeholder="Select category..." /></SelectTrigger>
               <SelectContent>
                 {categories.map(c => (
@@ -256,9 +256,8 @@ export function BlogEditorForm({ initialData, categories }: BlogEditorFormProps)
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           <h3 className="font-semibold border-b pb-2">Featured Image</h3>
           <ImageUpload 
-            value={form.watch("featuredImage") ? [form.watch("featuredImage")!] : []} 
-            onChange={(urls) => form.setValue("featuredImage", urls[0] || "")}
-            onRemove={(url) => form.setValue("featuredImage", "")}
+            value={form.watch("featuredImage") ? [{ url: form.watch("featuredImage") as string, publicId: "featured", type: "Cover Image" }] : []} 
+            onChange={(items) => form.setValue("featuredImage", items.length > 0 ? items[0].url : "")}
           />
         </div>
 
@@ -273,7 +272,7 @@ export function BlogEditorForm({ initialData, categories }: BlogEditorFormProps)
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700">Estimated Difficulty</label>
-            <Select value={form.watch("estimatedDifficulty")} onValueChange={(val) => form.setValue("estimatedDifficulty", val)}>
+            <Select value={form.watch("estimatedDifficulty")} onValueChange={(val) => form.setValue("estimatedDifficulty", val as string)}>
               <SelectTrigger><SelectValue placeholder="Beginner, Intermediate..." /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="Beginner">Beginner</SelectItem>

@@ -1,3 +1,4 @@
+export {};
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -59,7 +60,7 @@ async function main() {
 
   console.log('Seeding Blog Posts...');
   for (const article of articles) {
-    const category = allCategories.find(c => c.slug === article.cat) || allCategories[0];
+    const category = allCategories.find((c: any) => c.slug === article.cat) || allCategories[0];
     const slug = article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     
     await prisma.blogPost.upsert({

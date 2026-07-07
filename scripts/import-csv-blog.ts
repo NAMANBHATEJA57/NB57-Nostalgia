@@ -24,7 +24,7 @@ async function main() {
     if (!row.Title || !row.Slug) continue;
 
     const categorySlug = row.Category?.trim().toLowerCase() || 'pokemon';
-    let category = allCategories.find(c => c.slug === categorySlug);
+    let category = allCategories.find((c: any) => c.slug === categorySlug);
     
     // Fallback if category doesn't exist
     if (!category) {
