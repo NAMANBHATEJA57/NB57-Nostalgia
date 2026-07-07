@@ -9,7 +9,6 @@ export default function Navbar() {
       </Link>
       <div className="space-x-6 text-sm font-medium">
         <Link href="/collection" className="hover:text-primary transition-colors">Collection</Link>
-        <Link href="/categories" className="hover:text-primary transition-colors">Categories</Link>
       </div>
     </nav>
   );

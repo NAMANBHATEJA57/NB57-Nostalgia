@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Item, Category } from "@prisma/client";
 import { toast } from "sonner";
-import { deleteItem, deleteItems } from "@/app/admin/items/actions";
+import { deleteItem, deleteItems, duplicateItem } from "@/app/admin/items/actions";
 import { 
   Table, 
   TableBody, 
@@ -12,10 +12,10 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Filter, Edit, Trash, ExternalLink } from "lucide-react";
+import { Search, Filter, Edit, Trash, ExternalLink, Copy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -30,6 +30,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type ItemWithCategory = Item & { category: Category };
 
@@ -41,8 +50,22 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
   const [items, setItems] = useState(initialItems);
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean, type: 'single' | 'bulk', itemId?: string }>({ open: false, type: 'single' });
+
+  const handleDuplicate = (id: string) => {
+    startTransition(async () => {
+      const result = await duplicateItem(id);
+      if (result.success && result.item) {
+        toast.success("Item duplicated successfully");
+        setItems([result.item as ItemWithCategory, ...items]);
+      } else {
+        toast.error(result.error || "Failed to duplicate item");
+      }
+    });
+  };
 
   const handleDelete = (id: string) => {
     startTransition(async () => {
@@ -73,11 +96,19 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
   };
 
   // Filter items client-side for now
-  const filteredItems = items.filter(item => 
-    item.name.toLowerCase().includes(search.toLowerCase()) || 
-    item.sku.toLowerCase().includes(search.toLowerCase()) ||
-    item.category.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredItems = items.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
+                          item.sku.toLowerCase().includes(search.toLowerCase()) ||
+                          item.category.name.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesCategory = categoryFilter.length === 0 || categoryFilter.includes(item.category.name);
+    const matchesStatus = statusFilter.length === 0 || statusFilter.includes(item.availability);
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
+
+  const categories = Array.from(new Set(items.map(item => item.category.name)));
+  const statuses = Array.from(new Set(items.map(item => item.availability)));
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -129,10 +160,45 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
                 </Button>
              </div>
           )}
-          <Button variant="outline" size="sm">
-            <Filter className="mr-2 h-4 w-4" />
-            Filters
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className={buttonVariants({ variant: "outline", size: "sm" })}>
+              <Filter className="mr-2 h-4 w-4" />
+              Filters {(categoryFilter.length > 0 || statusFilter.length > 0) && `(${categoryFilter.length + statusFilter.length})`}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                {statuses.map(status => (
+                  <DropdownMenuCheckboxItem 
+                    key={status} 
+                    checked={statusFilter.includes(status)}
+                    onCheckedChange={(checked) => {
+                      if (checked) setStatusFilter([...statusFilter, status]);
+                      else setStatusFilter(statusFilter.filter(s => s !== status));
+                    }}
+                  >
+                    {status}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuGroup>
+              {statuses.length > 0 && <DropdownMenuSeparator />}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
+                {categories.map(category => (
+                  <DropdownMenuCheckboxItem 
+                    key={category} 
+                    checked={categoryFilter.includes(category)}
+                    onCheckedChange={(checked) => {
+                      if (checked) setCategoryFilter([...categoryFilter, category]);
+                      else setCategoryFilter(categoryFilter.filter(c => c !== category));
+                    }}
+                  >
+                    {category}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       
@@ -205,7 +271,17 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex justify-end gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => handleDuplicate(item.id)}
+                        disabled={isPending}
+                        title="Duplicate"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                       <Link href={`/admin/items/${item.id}`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                           <Edit className="h-4 w-4" />
