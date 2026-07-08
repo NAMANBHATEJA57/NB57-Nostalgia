@@ -3,6 +3,7 @@ import { Plus, Download } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ItemsTable } from "@/components/admin/ItemsTable";
+import { ExportCsvButton } from "@/components/admin/ExportCsvButton";
 
 export const dynamic = 'force-dynamic'; // Always fetch fresh data for admin
 
@@ -45,10 +46,7 @@ export default async function ItemsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
-          </Button>
+          <ExportCsvButton items={items} />
           <Link href="/admin/new-item">
             <Button>
               <Plus className="mr-2 h-4 w-4" />

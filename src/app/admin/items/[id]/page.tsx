@@ -7,12 +7,17 @@ import Link from 'next/link';
 
 export default async function AdminEditItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const item = await prisma.item.findUnique({
-    where: { id },
-    include: {
-      images: true
-    }
-  });
+  const [item, categories] = await Promise.all([
+    prisma.item.findUnique({
+      where: { id },
+      include: {
+        images: true
+      }
+    }),
+    prisma.category.findMany({
+      orderBy: { name: 'asc' }
+    })
+  ]);
 
   if (!item) {
     notFound();
@@ -31,7 +36,7 @@ export default async function AdminEditItemPage({ params }: { params: Promise<{ 
         </p>
       </div>
 
-      <EditItemForm item={item} />
+      <EditItemForm item={item} categories={categories} />
     </div>
   );
 }

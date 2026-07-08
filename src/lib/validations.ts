@@ -36,7 +36,7 @@ export const itemFormSchema = z.object({
   purchaseDate: z.string().optional().nullable(),
 
   // Section 5: Condition
-  condition: z.enum(["Factory Sealed", "Excellent", "Good", "Played", "Heavy Played", "Damaged"]),
+  condition: z.enum(["Factory Sealed", "Near Mint / Not Played", "Excellent", "Good", "Played", "Heavy Played", "Damaged"]),
 
   // Section 6: Availability
   availability: z.enum(["Available", "Reserved", "Sold", "Not For Sale"]),

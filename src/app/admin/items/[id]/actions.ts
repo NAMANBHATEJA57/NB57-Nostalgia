@@ -19,6 +19,7 @@ export async function updateItem(id: string, formData: FormData) {
   const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
   const availability = formData.get('availability') as string;
   const description = formData.get('description') as string;
+  const categoryId = formData.get('categoryId') as string;
   const coverImage = formData.get('coverImage') as string;
   
   const extraImagesJson = formData.get('extraImagesJson') as string;
@@ -41,6 +42,7 @@ export async function updateItem(id: string, formData: FormData) {
         condition,
         quantity,
         availability,
+        categoryId: categoryId || undefined,
         description,
         coverImage
       }

@@ -148,12 +148,14 @@ export function AddItemForm({ categories }: { categories: Category[] }) {
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
+                              <span className="flex flex-1 text-left line-clamp-1">
+                                {field.value ? categories.find(c => c.id === field.value)?.name : "Select a category"}
+                              </span>
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {categories.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
+                              <SelectItem key={category.id} value={category.id} label={category.name}>
                                 {category.name}
                               </SelectItem>
                             ))}
@@ -529,6 +531,7 @@ export function AddItemForm({ categories }: { categories: Category[] }) {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="Factory Sealed">Factory Sealed</SelectItem>
+                          <SelectItem value="Near Mint / Not Played">Near Mint / Not Played</SelectItem>
                           <SelectItem value="Excellent">Excellent</SelectItem>
                           <SelectItem value="Good">Good</SelectItem>
                           <SelectItem value="Played">Played</SelectItem>

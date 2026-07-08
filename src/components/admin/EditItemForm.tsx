@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Item, Image as ItemImage } from '@prisma/client';
+import { Item, Image as ItemImage, Category } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,10 +14,12 @@ type ItemWithImages = Item & { images: ItemImage[] };
 
 interface EditItemFormProps {
   item: ItemWithImages;
+  categories: Category[];
 }
 
-export function EditItemForm({ item }: EditItemFormProps) {
+export function EditItemForm({ item, categories }: EditItemFormProps) {
   const [isPending, setIsPending] = useState(false);
+  const [categoryId, setCategoryId] = useState<string | null>(item.categoryId);
   const [extraImages, setExtraImages] = useState<string[]>(
     item.images.sort((a, b) => a.order - b.order).map(img => img.url)
   );
@@ -70,10 +72,43 @@ export function EditItemForm({ item }: EditItemFormProps) {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="categoryId">Category</Label>
+            <Select name="categoryId" value={categoryId} onValueChange={setCategoryId}>
+              <SelectTrigger>
+                <span className="flex flex-1 text-left line-clamp-1">
+                  {categoryId ? categories.find(c => c.id === categoryId)?.name : "Select category"}
+                </span>
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id} label={cat.name}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="condition">Condition</Label>
-            <Input id="condition" name="condition" defaultValue={item.condition} required />
+            <Select name="condition" defaultValue={item.condition}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select condition" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Factory Sealed">Factory Sealed</SelectItem>
+                <SelectItem value="Near Mint / Not Played">Near Mint / Not Played</SelectItem>
+                <SelectItem value="Excellent">Excellent</SelectItem>
+                <SelectItem value="Good">Good</SelectItem>
+                <SelectItem value="Played">Played</SelectItem>
+                <SelectItem value="Heavy Played">Heavy Played</SelectItem>
+                <SelectItem value="Damaged">Damaged</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="quantity">Quantity</Label>
