@@ -57,14 +57,16 @@ type ItemTableRow = {
 
 interface ItemsTableProps {
   items: ItemTableRow[];
+  allCategories?: string[];
 }
 
-export function ItemsTable({ items: initialItems }: ItemsTableProps) {
+export function ItemsTable({ items: initialItems, allCategories }: ItemsTableProps) {
   const [items, setItems] = useState(initialItems);
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [conditionFilter, setConditionFilter] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean, type: 'single' | 'bulk', itemId?: string }>({ open: false, type: 'single' });
 
@@ -116,12 +118,14 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
     
     const matchesCategory = categoryFilter.length === 0 || categoryFilter.includes(item.category?.name || '');
     const matchesStatus = statusFilter.length === 0 || statusFilter.includes(item.availability);
+    const matchesCondition = conditionFilter.length === 0 || (item.condition && conditionFilter.includes(item.condition));
 
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesCategory && matchesStatus && matchesCondition;
   });
 
-  const categories = Array.from(new Set(items.map(item => item.category?.name || 'Uncategorized')));
-  const statuses = Array.from(new Set(items.map(item => item.availability)));
+  const categories = allCategories || Array.from(new Set(items.map(item => item.category?.name || 'Uncategorized')));
+  const statuses = ['Available', 'Reserved', 'Sold', 'Not for Sale'];
+  const conditions = Array.from(new Set(items.map(item => item.condition))).filter(Boolean) as string[];
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -176,7 +180,7 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
           <DropdownMenu>
             <DropdownMenuTrigger className={buttonVariants({ variant: "outline", size: "sm" })}>
               <Filter className="mr-2 h-4 w-4" />
-              Filters {(categoryFilter.length > 0 || statusFilter.length > 0) && `(${categoryFilter.length + statusFilter.length})`}
+              Filters {(categoryFilter.length > 0 || statusFilter.length > 0 || conditionFilter.length > 0) && `(${categoryFilter.length + statusFilter.length + conditionFilter.length})`}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuGroup>
@@ -210,6 +214,26 @@ export function ItemsTable({ items: initialItems }: ItemsTableProps) {
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuGroup>
+              {conditions.length > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>Filter by Condition</DropdownMenuLabel>
+                    {conditions.map(condition => (
+                      <DropdownMenuCheckboxItem 
+                        key={condition} 
+                        checked={conditionFilter.includes(condition)}
+                        onCheckedChange={(checked) => {
+                          if (checked) setConditionFilter([...conditionFilter, condition]);
+                          else setConditionFilter(conditionFilter.filter(c => c !== condition));
+                        }}
+                      >
+                        {condition}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuGroup>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

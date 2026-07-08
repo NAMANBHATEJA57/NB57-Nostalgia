@@ -15,6 +15,8 @@ export async function updateItem(id: string, formData: FormData) {
   const askingPriceStr = formData.get('askingPrice') as string;
   const askingPrice = askingPriceStr ? parseFloat(askingPriceStr) : null;
   const condition = formData.get('condition') as string;
+  const quantityStr = formData.get('quantity') as string;
+  const quantity = quantityStr ? parseInt(quantityStr, 10) : 1;
   const availability = formData.get('availability') as string;
   const description = formData.get('description') as string;
   const coverImage = formData.get('coverImage') as string;
@@ -37,6 +39,7 @@ export async function updateItem(id: string, formData: FormData) {
         name,
         askingPrice,
         condition,
+        quantity,
         availability,
         description,
         coverImage

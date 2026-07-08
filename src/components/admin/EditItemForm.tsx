@@ -70,10 +70,14 @@ export function EditItemForm({ item }: EditItemFormProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="condition">Condition</Label>
             <Input id="condition" name="condition" defaultValue={item.condition} required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="quantity">Quantity</Label>
+            <Input id="quantity" name="quantity" type="number" defaultValue={item.quantity || 1} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="availability">Availability</Label>

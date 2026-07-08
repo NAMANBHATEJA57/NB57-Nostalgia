@@ -7,8 +7,9 @@ import { ItemsTable } from "@/components/admin/ItemsTable";
 export const dynamic = 'force-dynamic'; // Always fetch fresh data for admin
 
 export default async function ItemsPage() {
-  const items = await prisma.item.findMany({
-    select: {
+  const [items, categories] = await Promise.all([
+    prisma.item.findMany({
+      select: {
       id: true,
       sku: true,
       slug: true,
@@ -27,7 +28,12 @@ export default async function ItemsPage() {
     orderBy: {
       createdAt: 'desc'
     }
-  });
+  }),
+  prisma.category.findMany({
+    select: { name: true },
+    orderBy: { name: 'asc' }
+  })
+  ]);
 
   return (
     <div className="p-8">
@@ -52,7 +58,7 @@ export default async function ItemsPage() {
         </div>
       </div>
 
-      <ItemsTable items={items} />
+      <ItemsTable items={items} allCategories={categories.map(c => c.name)} />
     </div>
   );
 }
