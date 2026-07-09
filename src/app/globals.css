@@ -49,68 +49,68 @@
 }
 
 :root {
-  /* Minimal Black & White + Gold Theme */
-  --background: #FAFAF8;
-  --foreground: #171717; /* Minimal Black */
+  /* Minimal Monochrome + Blue Accent Theme */
+  --background: #FFFFFF;
+  --foreground: #09090B;
   --card: #FFFFFF;
-  --card-foreground: #171717;
+  --card-foreground: #09090B;
   --popover: #FFFFFF;
-  --popover-foreground: #171717;
-  --primary: #171717;
+  --popover-foreground: #09090B;
+  --primary: #09090B;
   --primary-foreground: #FFFFFF;
-  --secondary: #404040;
-  --secondary-foreground: #FFFFFF;
-  --muted: #E8ECF0;
-  --muted-foreground: #737373;
-  --accent: #A16207; /* Accent Gold */
+  --secondary: #F4F4F5;
+  --secondary-foreground: #09090B;
+  --muted: #F4F4F5;
+  --muted-foreground: #71717A;
+  --accent: #2563EB; /* Blue Accent */
   --accent-foreground: #FFFFFF;
-  --destructive: #DC2626;
-  --border: #E5E5E5;
-  --input: #E5E5E5;
-  --ring: #171717;
-  --chart-1: #A16207;
-  --chart-2: #404040;
-  --chart-3: #737373;
-  --chart-4: #E8ECF0;
-  --chart-5: #171717;
+  --destructive: #EF4444;
+  --border: #E4E4E7;
+  --input: #E4E4E7;
+  --ring: #2563EB;
+  --chart-1: #2563EB;
+  --chart-2: #3B82F6;
+  --chart-3: #60A5FA;
+  --chart-4: #93C5FD;
+  --chart-5: #09090B;
   --radius: 12px;
-  --sidebar: #FAFAF8;
-  --sidebar-foreground: #171717;
-  --sidebar-primary: #171717;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #09090B;
+  --sidebar-primary: #09090B;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #E8ECF0;
-  --sidebar-accent-foreground: #171717;
-  --sidebar-border: #E5E5E5;
-  --sidebar-ring: #171717;
+  --sidebar-accent: #F4F4F5;
+  --sidebar-accent-foreground: #09090B;
+  --sidebar-border: #E4E4E7;
+  --sidebar-ring: #2563EB;
 }
 
 .dark {
-  --background: #171717;
-  --foreground: #FAFAF8;
-  --card: #262626;
-  --card-foreground: #FAFAF8;
-  --popover: #262626;
-  --popover-foreground: #FAFAF8;
-  --primary: #FAFAF8;
-  --primary-foreground: #171717;
-  --secondary: #404040;
-  --secondary-foreground: #FAFAF8;
-  --muted: #404040;
-  --muted-foreground: #A3A3A3;
-  --accent: #A16207;
+  --background: #09090B;
+  --foreground: #FAFAFA;
+  --card: #09090B;
+  --card-foreground: #FAFAFA;
+  --popover: #09090B;
+  --popover-foreground: #FAFAFA;
+  --primary: #FAFAFA;
+  --primary-foreground: #09090B;
+  --secondary: #27272A;
+  --secondary-foreground: #FAFAFA;
+  --muted: #27272A;
+  --muted-foreground: #A1A1AA;
+  --accent: #2563EB;
   --accent-foreground: #FFFFFF;
-  --destructive: #EF4444;
-  --border: #404040;
-  --input: #404040;
-  --ring: #FAFAF8;
-  --sidebar: #171717;
-  --sidebar-foreground: #FAFAF8;
-  --sidebar-primary: #FAFAF8;
-  --sidebar-primary-foreground: #171717;
-  --sidebar-accent: #404040;
-  --sidebar-accent-foreground: #FAFAF8;
-  --sidebar-border: #404040;
-  --sidebar-ring: #FAFAF8;
+  --destructive: #7F1D1D;
+  --border: #27272A;
+  --input: #27272A;
+  --ring: #2563EB;
+  --sidebar: #09090B;
+  --sidebar-foreground: #FAFAFA;
+  --sidebar-primary: #FAFAFA;
+  --sidebar-primary-foreground: #09090B;
+  --sidebar-accent: #27272A;
+  --sidebar-accent-foreground: #FAFAFA;
+  --sidebar-border: #27272A;
+  --sidebar-ring: #2563EB;
 }
 
 @layer base {
@@ -125,11 +125,15 @@
   }
 }
 
-/* Glassmorphism utility for admin panel */
 .admin-bg {
-  background-color: #f8fafc;
-  background-image: radial-gradient(at 40% 20%, hsla(28,100%,74%,0.15) 0px, transparent 50%),
-                    radial-gradient(at 80% 0%, hsla(189,100%,56%,0.1) 0px, transparent 50%),
-                    radial-gradient(at 0% 50%, hsla(355,100%,93%,0.2) 0px, transparent 50%);
-  background-attachment: fixed;
+  background-color: var(--background);
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
 }

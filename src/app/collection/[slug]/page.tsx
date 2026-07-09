@@ -74,7 +74,7 @@ export default async function CollectionItemPage({ params }: { params: Promise<{
     <div className="min-h-screen flex flex-col bg-[#FAFAF8] text-slate-900 selection:bg-slate-200">
       <Navbar />
       
-      <main className="flex-1 w-full pt-24 pb-32">
+      <main className="flex-1 w-full pt-36 pb-32">
         {/* Navigation Breadcrumb */}
         <div className="max-w-7xl mx-auto px-6 mb-8">
           <Link href="/collection" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors group">
@@ -172,7 +172,15 @@ export default async function CollectionItemPage({ params }: { params: Promise<{
               </h1>
               
               <div className="prose prose-slate prose-p:font-light prose-p:leading-relaxed text-slate-600 max-w-none">
-                <p className="whitespace-pre-wrap">{item.description || 'No detailed history available for this item.'}</p>
+                {item.description ? (
+                  item.description.includes('<') ? (
+                    <div dangerouslySetInnerHTML={{ __html: item.description }} className="[&>p]:mb-4" />
+                  ) : (
+                    <p className="whitespace-pre-wrap">{item.description}</p>
+                  )
+                ) : (
+                  <p className="whitespace-pre-wrap">No detailed history available for this item.</p>
+                )}
               </div>
             </div>
 
@@ -199,16 +207,25 @@ export default async function CollectionItemPage({ params }: { params: Promise<{
             <div className="bg-white rounded-3xl p-8 shadow-lg shadow-slate-200/40 border border-slate-100">
               <h3 className="font-cormorant text-2xl font-bold mb-6">Market Valuation</h3>
               
-              <div className="mb-8">
-                <span className="text-slate-400 block mb-1 text-xs uppercase tracking-widest font-semibold">Estimated Fair Value</span>
-                <div className="text-4xl font-bold text-slate-900 tracking-tight font-mono">
-                  {item.fairValueMin && item.fairValueMax 
-                    ? `₹${item.fairValueMin.toLocaleString()} – ₹${item.fairValueMax.toLocaleString()}` 
-                    : item.askingPrice 
-                      ? `₹${item.askingPrice.toLocaleString()}` 
-                      : 'Value on Request'}
+              <div className="mb-6">
+                <span className="text-slate-400 block mb-1 text-xs uppercase tracking-widest font-semibold">Price</span>
+                <div className="text-4xl font-bold text-blue-600 tracking-tight font-mono">
+                  {item.askingPrice ? `₹${item.askingPrice.toLocaleString()}` : 'Value on Request'}
                 </div>
               </div>
+
+              {(item.fairValueMin && item.fairValueMax) && (
+                <div className="mb-8">
+                  <span className="text-slate-400 block mb-1 text-xs uppercase tracking-widest font-semibold">Estimated Fair Value</span>
+                  <div className="text-2xl font-semibold text-slate-600 tracking-tight font-mono">
+                    ₹{item.fairValueMin.toLocaleString()} – ₹{item.fairValueMax.toLocaleString()}
+                  </div>
+                </div>
+              )}
+              
+              {(!item.fairValueMin || !item.fairValueMax) && (
+                <div className="mb-8"></div>
+              )}
 
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between items-center text-sm border-b border-slate-100 pb-3">

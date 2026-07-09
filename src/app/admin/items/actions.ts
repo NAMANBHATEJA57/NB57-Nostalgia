@@ -62,18 +62,21 @@ export async function duplicateItem(id: string) {
       return { success: false, error: 'Item not found' };
     }
 
-    const lastItem = await prisma.item.findFirst({
-      orderBy: { createdAt: 'desc' },
+    const allItems = await prisma.item.findMany({
       select: { sku: true }
     });
 
-    let nextNumber = 1;
-    if (lastItem && lastItem.sku.startsWith('NB57-')) {
-      const lastNumber = parseInt(lastItem.sku.split('-')[1], 10);
-      if (!isNaN(lastNumber)) {
-        nextNumber = lastNumber + 1;
+    let maxNumber = 0;
+    for (const item of allItems) {
+      const match = item.sku.match(/^NB57-(\d{4})$/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNumber) {
+          maxNumber = num;
+        }
       }
     }
+    const nextNumber = maxNumber + 1;
     const sku = `NB57-${nextNumber.toString().padStart(4, '0')}`;
     const slug = `${itemToDuplicate.slug}-copy-${Date.now()}`;
 

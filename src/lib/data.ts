@@ -33,6 +33,24 @@ export const getHomepageItems = unstable_cache(
   { revalidate: REVALIDATE_TIME, tags: ['items'] }
 );
 
+export const getHeroBackgroundItems = unstable_cache(
+  async () => {
+    const items = await prisma.item.findMany({
+      select: { coverImage: true },
+      take: 50,
+      orderBy: { createdAt: 'desc' }
+    });
+    // Shuffle the array using Fisher-Yates
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    return items.filter(i => i.coverImage).slice(0, 24);
+  },
+  ['hero-background'],
+  { revalidate: REVALIDATE_TIME, tags: ['items'] }
+);
+
 export const getCategoriesWithCounts = unstable_cache(
   async () => {
     return prisma.category.findMany({

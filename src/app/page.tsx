@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
-import { getHomepageItems, getCategoriesWithCounts, getStatistics } from "@/lib/data";
+import { getHomepageItems, getCategoriesWithCounts, getStatistics, getHeroBackgroundItems } from "@/lib/data";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
@@ -12,10 +12,11 @@ export const revalidate = 3600;
 
 export default async function Home() {
   // ✅ Parallel fetch — all 3 queries run simultaneously
-  const [items, categories, { totalItems, sealedItems, soldItems }] = await Promise.all([
+  const [items, categories, { totalItems, sealedItems, soldItems }, heroItems] = await Promise.all([
     getHomepageItems(),
     getCategoriesWithCounts(),
-    getStatistics()
+    getStatistics(),
+    getHeroBackgroundItems()
   ]);
 
   const sortedCategories = [...categories].sort((a, b) => {
@@ -42,10 +43,34 @@ export default async function Home() {
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden pt-24">
         {/* Background Grid */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.02] flex items-center justify-center">
-          <div className="grid grid-cols-4 gap-8 rotate-12 scale-150">
-            {[...Array(16)].map((_, i) => (
-              <div key={i} className="w-64 h-64 bg-slate-900 rounded-2xl"></div>
+        <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
+          <div className="grid grid-cols-4 gap-8 rotate-12 scale-150 h-[150vh]">
+            {[...Array(4)].map((_, colIndex) => (
+              <div 
+                key={colIndex} 
+                className="flex flex-col gap-8"
+                style={{ 
+                  animation: `marquee-vertical ${30 + (colIndex % 3) * 10}s linear infinite`,
+                  animationDirection: colIndex % 2 === 0 ? 'normal' : 'reverse'
+                }}
+              >
+                {[...Array(12)].map((_, rowIndex) => {
+                  const item = heroItems[(colIndex * 12 + rowIndex) % Math.max(heroItems.length, 1)];
+                  return (
+                    <div key={rowIndex} className="w-64 h-64 shrink-0 bg-slate-100 rounded-2xl overflow-hidden relative opacity-[15%] shadow-sm">
+                      {item?.coverImage && (
+                        <Image 
+                          src={item.coverImage}
+                          alt=""
+                          fill
+                          sizes="256px"
+                          className="object-cover" 
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             ))}
           </div>
         </div>

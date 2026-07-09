@@ -10,12 +10,7 @@ export default async function NewItemPage() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold tracking-tight">Add New Item</h2>
-        <p className="text-muted-foreground mt-1">
-          Create a new collectible entry in your archive.
-        </p>
-      </div>
+
       
       <AddItemForm categories={categories} />
     </div>
