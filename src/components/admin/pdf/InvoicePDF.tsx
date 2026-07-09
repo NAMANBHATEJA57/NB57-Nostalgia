@@ -254,8 +254,8 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, logoUrl, qrCode
               <Text style={[styles.tableCell, styles.colItem]}>{item.itemName}</Text>
               <Text style={[styles.tableCell, styles.colSku]}>{item.itemSku}</Text>
               <Text style={[styles.tableCell, styles.colQty]}>{item.quantity}</Text>
-              <Text style={[styles.tableCell, styles.colPrice]}>₹{item.unitPrice.toLocaleString('en-IN')}</Text>
-              <Text style={[styles.tableCell, styles.colAmount]}>₹{item.totalPrice.toLocaleString('en-IN')}</Text>
+              <Text style={[styles.tableCell, styles.colPrice]}>Rs. {item.unitPrice.toLocaleString('en-IN')}</Text>
+              <Text style={[styles.tableCell, styles.colAmount]}>Rs. {item.totalPrice.toLocaleString('en-IN')}</Text>
             </View>
           ))}
         </View>
@@ -265,47 +265,47 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, logoUrl, qrCode
           <View style={styles.totalsBox}>
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Subtotal</Text>
-              <Text style={styles.totalValue}>₹{invoice.subtotal.toLocaleString('en-IN')}</Text>
+              <Text style={styles.totalValue}>Rs. {invoice.subtotal.toLocaleString('en-IN')}</Text>
             </View>
             
             {invoice.discountAmount > 0 && (
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Discount {invoice.discountPercent ? `(${invoice.discountPercent}%)` : ''}</Text>
-                <Text style={styles.totalValue}>- ₹{invoice.discountAmount.toLocaleString('en-IN')}</Text>
+                <Text style={styles.totalValue}>- Rs. {invoice.discountAmount.toLocaleString('en-IN')}</Text>
               </View>
             )}
 
             {invoice.taxAmount > 0 && (
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Tax {invoice.taxPercent ? `(${invoice.taxPercent}%)` : ''}</Text>
-                <Text style={styles.totalValue}>₹{invoice.taxAmount.toLocaleString('en-IN')}</Text>
+                <Text style={styles.totalValue}>Rs. {invoice.taxAmount.toLocaleString('en-IN')}</Text>
               </View>
             )}
 
             {invoice.shippingCharge > 0 && (
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Shipping</Text>
-                <Text style={styles.totalValue}>₹{invoice.shippingCharge.toLocaleString('en-IN')}</Text>
+                <Text style={styles.totalValue}>Rs. {invoice.shippingCharge.toLocaleString('en-IN')}</Text>
               </View>
             )}
 
             {invoice.packagingCharge > 0 && (
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Packaging</Text>
-                <Text style={styles.totalValue}>₹{invoice.packagingCharge.toLocaleString('en-IN')}</Text>
+                <Text style={styles.totalValue}>Rs. {invoice.packagingCharge.toLocaleString('en-IN')}</Text>
               </View>
             )}
 
             {invoice.miscCharge > 0 && (
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Misc Charges</Text>
-                <Text style={styles.totalValue}>₹{invoice.miscCharge.toLocaleString('en-IN')}</Text>
+                <Text style={styles.totalValue}>Rs. {invoice.miscCharge.toLocaleString('en-IN')}</Text>
               </View>
             )}
 
             <View style={styles.grandTotalRow}>
               <Text style={styles.grandTotalLabel}>Grand Total</Text>
-              <Text style={styles.grandTotalValue}>₹{invoice.grandTotal.toLocaleString('en-IN')}</Text>
+              <Text style={styles.grandTotalValue}>Rs. {invoice.grandTotal.toLocaleString('en-IN')}</Text>
             </View>
             
             <View style={[styles.totalRow, { marginTop: 10 }]}>
