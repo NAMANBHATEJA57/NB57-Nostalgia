@@ -2,8 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { formatCurrency } from "@/lib/constants";
 import Link from "next/link";
-import { ArrowLeft, User, MapPin, Mail, Phone, FileText, Calendar, Box, Hash } from "lucide-react";
+import { ArrowLeft, User, MapPin, Mail, Phone, FileText, Calendar, Box, Hash, Edit } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,11 @@ export default async function CustomerProfilePage({ params }: { params: Promise<
         <h1 className="text-sm font-semibold text-foreground flex items-center gap-2">
           <User className="h-4 w-4" /> Customer Profile
         </h1>
+        <div className="ml-auto">
+          <Button variant="outline" size="sm" render={<Link href={`/admin/customers/${customer.id}/edit`} />}>
+            <Edit className="h-4 w-4 mr-2" /> Edit Customer
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-auto p-8 bg-background">

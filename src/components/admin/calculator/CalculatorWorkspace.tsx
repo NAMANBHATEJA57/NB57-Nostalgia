@@ -10,6 +10,7 @@ import { searchItems, saveQuote, convertToInvoice } from "@/app/admin/calculator
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { ConvertCalculationModal } from "./ConvertCalculationModal";
 
 interface SelectedItem {
   itemId: string;
@@ -60,6 +61,7 @@ export function CalculatorWorkspace({ initialQuote }: { initialQuote?: any }) {
   const [advancePaid, setAdvancePaid] = useState<number>(initialQuote?.advancePaid || 0);
   
   const [isSaving, setIsSaving] = useState(false);
+  const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -158,6 +160,10 @@ export function CalculatorWorkspace({ initialQuote }: { initialQuote?: any }) {
     setIsSaving(false);
     if (result.success) {
       toast.success("Quote saved successfully");
+      // Update ID if it's a new quote being saved
+      if (!initialQuote?.id && result.quoteId) {
+        router.replace(`/admin/calculator/${result.quoteId}`);
+      }
     } else {
       toast.error(result.error);
     }
@@ -168,41 +174,9 @@ export function CalculatorWorkspace({ initialQuote }: { initialQuote?: any }) {
       toast.error("Add at least one item");
       return;
     }
-    if (!customerName || !customerPhone) {
-      toast.error("Customer Name and Phone are required to convert to invoice");
-      return;
-    }
-    setIsSaving(true);
-    const saveResult = await saveQuote({
-      title: quoteTitle,
-      customerName,
-      customerPhone,
-      subtotal,
-      discountPercent: discountType === "percent" ? discountValue : null,
-      discountAmount,
-      shippingCharge,
-      packagingCharge,
-      miscCharge,
-      grandTotal,
-      advancePaid,
-      notes,
-      items: selectedItems,
-      ...(initialQuote?.id && { id: initialQuote.id }),
-    });
     
-    if (saveResult.success && saveResult.quoteId) {
-      const invoiceNum = `NB57-INV-${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
-      const result = await convertToInvoice(saveResult.quoteId, invoiceNum);
-      if (result.success) {
-        toast.success(`Converted to Invoice: ${invoiceNum}`);
-        router.push(`/admin/invoices`);
-      } else {
-        toast.error(result.error);
-      }
-    } else {
-      toast.error("Failed to save quote before converting");
-    }
-    setIsSaving(false);
+    // Open the conversion modal instead of converting instantly
+    setIsConvertModalOpen(true);
   };
 
   const handleReset = useCallback(() => {
@@ -428,8 +402,32 @@ export function CalculatorWorkspace({ initialQuote }: { initialQuote?: any }) {
           onReset={handleReset}
           onPrintQuote={handlePrint}
           isSaving={isSaving}
+          quoteStatus={initialQuote?.status}
+          invoiceId={initialQuote?.invoiceId}
         />
       </div>
+
+      <ConvertCalculationModal 
+        isOpen={isConvertModalOpen} 
+        onClose={() => setIsConvertModalOpen(false)} 
+        quoteData={{
+          id: initialQuote?.id,
+          title: quoteTitle,
+          customerName,
+          customerPhone,
+          subtotal,
+          discountPercent: discountType === "percent" ? discountValue : null,
+          discountAmount,
+          shippingCharge,
+          packagingCharge,
+          miscCharge,
+          grandTotal,
+          advancePaid,
+          notes,
+          items: selectedItems,
+        }}
+        onSuccess={() => setIsConvertModalOpen(false)}
+      />
 
       {/* Print View Only */}
       <div className="hidden print:block space-y-8">

@@ -15,6 +15,8 @@ interface LiveSummaryCardProps {
   onReset: () => void;
   onPrintQuote: () => void;
   isSaving: boolean;
+  quoteStatus?: string;
+  invoiceId?: string;
 }
 
 export function LiveSummaryCard({
@@ -31,6 +33,8 @@ export function LiveSummaryCard({
   onReset,
   onPrintQuote,
   isSaving,
+  quoteStatus,
+  invoiceId,
 }: LiveSummaryCardProps) {
   const grossProfit = grandTotal - (purchaseCost + shippingCharge + packagingCharge + miscCharge);
   const netProfit = grossProfit; // Can subtract other costs if needed
@@ -95,12 +99,32 @@ export function LiveSummaryCard({
         </div>
 
         <div className="space-y-2 pt-4">
-          <Button className="w-full" onClick={onSaveQuote} disabled={isSaving}>
-            {isSaving ? "Saving..." : "Save Calculation (Ctrl+S)"}
-          </Button>
-          <Button variant="secondary" className="w-full" onClick={onConvertToInvoice} disabled={isSaving}>
-            Convert to Invoice (Ctrl+I)
-          </Button>
+          {quoteStatus === "Converted" ? (
+            <div className="space-y-2">
+              <div className="p-3 bg-green-50 text-green-700 border border-green-200 rounded-lg text-center font-medium text-sm flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                Converted to Invoice
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" className="w-full" onClick={() => window.location.href = `/admin/invoices/${invoiceId}`}>
+                  View Invoice
+                </Button>
+                <Button variant="outline" className="w-full" onClick={onReset}>
+                  New Calculation
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm" onClick={onConvertToInvoice} disabled={isSaving}>
+                Convert to Invoice (Ctrl+I)
+              </Button>
+              <Button variant="secondary" className="w-full" onClick={onSaveQuote} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save Calculation (Ctrl+S)"}
+              </Button>
+            </>
+          )}
+          
           <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" onClick={onPrintQuote}>Print (Ctrl+P)</Button>
             <Button variant="outline" onClick={onReset}>Reset (Esc)</Button>

@@ -184,6 +184,7 @@ export default async function DashboardPage() {
   const quoteStats = {
     savedQuotes: quoteAggregate._count.id || 0,
     convertedQuotes: quoteCount || 0,
+    conversionRate: ((quoteAggregate._count.id + quoteCount) > 0) ? (quoteCount / (quoteAggregate._count.id + quoteCount)) * 100 : 0,
     averageDiscount: (quoteAggregate._count.id > 0) ? (quoteAggregate._sum.discountAmount || 0) / quoteAggregate._count.id : 0,
     averageDealSize: (quoteAggregate._count.id > 0) ? (quoteAggregate._sum.grandTotal || 0) / quoteAggregate._count.id : 0,
   };

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Eye } from "lucide-react";
+import { Plus, Eye, Edit } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -69,9 +69,14 @@ export default async function CustomersPage() {
                       {format(new Date(customer.createdAt), "dd MMM yyyy")}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" render={<Link href={`/admin/customers/${customer.id}`} />}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" render={<Link href={`/admin/customers/${customer.id}/edit`} />}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" render={<Link href={`/admin/customers/${customer.id}`} />}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

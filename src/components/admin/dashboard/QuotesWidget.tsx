@@ -7,6 +7,7 @@ interface QuotesWidgetProps {
   stats: {
     savedQuotes: number;
     convertedQuotes: number;
+    conversionRate: number;
     averageDiscount: number;
     averageDealSize: number;
   };
@@ -36,6 +37,10 @@ export function QuotesWidget({ stats }: QuotesWidgetProps) {
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Converted</p>
             <p className="text-xl font-bold">{stats.convertedQuotes}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Conversion Rate</p>
+            <p className="text-xl font-bold">{stats.conversionRate.toFixed(1)}%</p>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Avg Discount</p>
