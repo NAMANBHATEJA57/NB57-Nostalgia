@@ -68,6 +68,7 @@ export async function updateItem(id: string, formData: FormData) {
     )
   ]);
 
+  revalidatePath('/');
   revalidatePath('/admin/items');
   revalidatePath('/admin/dashboard');
   revalidatePath(`/collection`);

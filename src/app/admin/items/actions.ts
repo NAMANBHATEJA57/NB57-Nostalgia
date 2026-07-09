@@ -13,6 +13,7 @@ export async function deleteItem(id: string) {
       where: { id },
     });
     
+    revalidatePath('/');
     revalidatePath('/admin/items');
     revalidatePath('/admin/dashboard');
     revalidatePath('/collection');
@@ -36,6 +37,7 @@ export async function deleteItems(ids: string[]) {
       },
     });
     
+    revalidatePath('/');
     revalidatePath('/admin/items');
     revalidatePath('/admin/dashboard');
     revalidatePath('/collection');
@@ -99,6 +101,7 @@ export async function duplicateItem(id: string) {
       }
     });
 
+    revalidatePath('/');
     revalidatePath('/admin/items');
     revalidatePath('/admin/dashboard');
     revalidatePath('/collection');
