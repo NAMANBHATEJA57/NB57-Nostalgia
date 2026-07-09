@@ -159,25 +159,27 @@ export default async function DashboardPage() {
   // ─── Process Data ───────────────────────────────────────────
   const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
   const categoryData = categoryGroups
-    .map((g) => ({
+    .map((g: any) => ({
       name: categoryMap.get(g.categoryId) || "Uncategorized",
       count: g._count.id,
       value: g._sum.askingPrice || 0,
     }))
-    .sort((a, b) => b.count - a.count);
+    .sort((a: any, b: any) => b.count - a.count);
 
   const monthlyData = Array.from({ length: 12 }).map((_, i) => {
     const month = new Date(now.getFullYear(), i, 1);
     const monthName = month.toLocaleDateString("en-US", { month: "short" });
-    const monthEntries = monthlyLedgerEntries.filter((entry) => {
+    const monthEntries = monthlyLedgerEntries.filter((entry: any) => {
       const d = new Date(entry.createdAt);
       return d.getMonth() === i;
     });
     
-    const revenue = monthEntries.filter(e => e.type === "Revenue").reduce((sum, e) => sum + e.amount, 0);
-    const profit = monthEntries.filter(e => e.type === "Profit").reduce((sum, e) => sum + e.amount, 0);
+    const revenueEntries = monthEntries.filter((e: any) => e.type === "Revenue");
+    const revenue = revenueEntries.reduce((sum: number, e: any) => sum + e.amount, 0);
+    const profit = monthEntries.filter((e: any) => e.type === "Profit").reduce((sum: number, e: any) => sum + e.amount, 0);
+    const invoices = revenueEntries.length;
 
-    return { month: monthName, revenue, profit };
+    return { month: monthName, revenue, profit, invoices };
   });
 
   // Stats object

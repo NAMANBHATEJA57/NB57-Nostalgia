@@ -19,6 +19,7 @@ interface MonthlyData {
   month: string;
   revenue: number;
   invoices: number;
+  profit: number;
 }
 
 // ─── Revenue Bar Chart ──────────────────────────────────────

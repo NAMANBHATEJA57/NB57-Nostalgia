@@ -152,7 +152,7 @@ export async function reverseLedgerEntries(invoiceId: string, tx?: any) {
   });
 
   // Create reversal entries
-  const reversalEntries = entries.map((entry) => ({
+  const reversalEntries = entries.map((entry: any) => ({
     invoiceId,
     type: "Deletion" as const,
     amount: -entry.amount,

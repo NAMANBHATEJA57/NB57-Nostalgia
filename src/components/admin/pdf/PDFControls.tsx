@@ -42,11 +42,13 @@ export const PDFControls: React.FC<PDFControlsProps> = ({ invoice, logoUrl, qrCo
       
       {/* INVOICE CONTROLS */}
       <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" /> Preview Invoice
-          </Button>
-        </DialogTrigger>
+        <DialogTrigger 
+          render={
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" /> Preview Invoice
+            </Button>
+          }
+        />
         <DialogContent className="max-w-4xl h-[80vh]">
           <DialogTitle>Invoice Preview</DialogTitle>
           <PDFViewer width="100%" height="100%">
@@ -71,11 +73,13 @@ export const PDFControls: React.FC<PDFControlsProps> = ({ invoice, logoUrl, qrCo
 
       {/* PACKING SLIP CONTROLS */}
       <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="flex items-center gap-2">
-            <Box className="w-4 h-4" /> Preview Packing Slip
-          </Button>
-        </DialogTrigger>
+        <DialogTrigger 
+          render={
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Box className="w-4 h-4" /> Preview Packing Slip
+            </Button>
+          }
+        />
         <DialogContent className="max-w-4xl h-[80vh]">
           <DialogTitle>Packing Slip Preview</DialogTitle>
           <PDFViewer width="100%" height="100%">

@@ -77,7 +77,7 @@ export async function decrypt(session: string | undefined = '') {
     const isValid = await crypto.subtle.verify(
       'HMAC',
       key,
-      signatureBuffer,
+      signatureBuffer as any,
       encoder.encode(dataToVerify)
     );
     
