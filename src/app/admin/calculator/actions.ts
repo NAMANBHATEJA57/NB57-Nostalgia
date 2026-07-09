@@ -128,6 +128,29 @@ export async function convertToInvoice(quoteId: string, invoiceNumber: string) {
       },
     });
 
+    // Update Item Availabilities
+    if (paymentStatus === "Paid") {
+      for (const item of quote.items) {
+        await prisma.item.update({
+          where: { id: item.itemId },
+          data: {
+            availability: "Sold",
+            soldPrice: item.sellingPrice,
+            soldDate: new Date(),
+          },
+        });
+      }
+    } else if (["Draft", "Partial", "Pending"].includes(paymentStatus)) {
+      for (const item of quote.items) {
+        await prisma.item.update({
+          where: { id: item.itemId },
+          data: {
+            availability: "Reserved",
+          },
+        });
+      }
+    }
+
     // Update Quote Status
     await prisma.quote.update({
       where: { id: quoteId },
@@ -136,6 +159,8 @@ export async function convertToInvoice(quoteId: string, invoiceNumber: string) {
 
     revalidatePath("/admin/calculator");
     revalidatePath("/admin/invoices");
+    revalidatePath("/");
+    revalidatePath("/collection", "layout");
 
     return { success: true, invoiceId: invoice.id };
   } catch (error) {

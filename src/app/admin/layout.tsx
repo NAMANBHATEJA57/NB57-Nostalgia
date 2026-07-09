@@ -77,7 +77,7 @@ export default function AdminLayout({
       <KeyboardShortcuts />
       
       {/* Left Sidebar */}
-      <aside className="w-60 border-r border-border bg-card flex flex-col flex-shrink-0">
+      <aside className="w-60 border-r border-border bg-card flex flex-col flex-shrink-0 print:hidden">
         <div className="h-14 flex items-center px-5 border-b border-border">
           <h1 className="font-sans text-sm font-semibold tracking-tight text-foreground">
             NB57&apos;s Nostalgia

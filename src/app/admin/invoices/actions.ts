@@ -150,6 +150,15 @@ export async function createInvoice(data: {
             },
           });
         }
+      } else if (["Draft", "Partial", "Pending"].includes(data.paymentStatus)) {
+        for (const item of data.items) {
+          await tx.item.update({
+            where: { id: item.itemId },
+            data: {
+              availability: "Reserved",
+            },
+          });
+        }
       }
 
       // Log timeline
@@ -188,6 +197,8 @@ export async function createInvoice(data: {
     revalidatePath('/admin/ledger');
     revalidatePath('/admin/profit');
     revalidatePath('/admin/customers');
+    revalidatePath('/');
+    revalidatePath('/collection', 'layout');
 
     return { success: true, invoice };
   } catch (error: any) {
@@ -241,7 +252,39 @@ export async function updateInvoice(
         trackingNumber: data.trackingNumber || null,
         courierName: data.courierName || null,
       },
+      include: { items: true },
     });
+
+    if (data.paymentStatus === "Paid") {
+      for (const item of invoice.items) {
+        await prisma.item.update({
+          where: { id: item.itemId },
+          data: {
+            availability: "Sold",
+            soldPrice: item.unitPrice,
+            soldDate: new Date(),
+          },
+        });
+      }
+    } else if (["Draft", "Partial", "Pending"].includes(data.paymentStatus)) {
+      for (const item of invoice.items) {
+        await prisma.item.update({
+          where: { id: item.itemId },
+          data: {
+            availability: "Reserved",
+          },
+        });
+      }
+    } else if (data.paymentStatus === "Cancelled") {
+      for (const item of invoice.items) {
+        await prisma.item.update({
+          where: { id: item.itemId },
+          data: {
+            availability: "Available",
+          },
+        });
+      }
+    }
 
     await logInvoiceTimeline({
       invoiceId,
@@ -258,6 +301,8 @@ export async function updateInvoice(
     revalidatePath('/admin/invoices');
     revalidatePath(`/admin/invoices/${invoiceId}`);
     revalidatePath('/admin/dashboard');
+    revalidatePath('/');
+    revalidatePath('/collection', 'layout');
 
     return { success: true, invoice };
   } catch (error) {
@@ -294,6 +339,24 @@ export async function updatePaymentStatus(invoiceId: string, status: string, amo
           },
         });
       }
+    } else if (["Draft", "Partial", "Pending"].includes(status)) {
+      for (const item of invoice.items) {
+        await prisma.item.update({
+          where: { id: item.itemId },
+          data: {
+            availability: "Reserved",
+          },
+        });
+      }
+    } else if (status === "Cancelled") {
+      for (const item of invoice.items) {
+        await prisma.item.update({
+          where: { id: item.itemId },
+          data: {
+            availability: "Available",
+          },
+        });
+      }
     }
 
     await logInvoiceTimeline({
@@ -306,6 +369,8 @@ export async function updatePaymentStatus(invoiceId: string, status: string, amo
     revalidatePath(`/admin/invoices/${invoiceId}`);
     revalidatePath('/admin/dashboard');
     revalidatePath('/admin/items');
+    revalidatePath('/');
+    revalidatePath('/collection', 'layout');
 
     return { success: true };
   } catch (error) {
@@ -367,6 +432,8 @@ export async function deleteInvoice(invoiceId: string) {
     revalidatePath('/admin/items');
     revalidatePath('/admin/ledger');
     revalidatePath('/admin/profit');
+    revalidatePath('/');
+    revalidatePath('/collection', 'layout');
 
     return { success: true };
   } catch (error: any) {
