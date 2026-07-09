@@ -129,7 +129,7 @@ export async function convertToInvoice(quoteId: string, invoiceNumber: string) {
     });
 
     // Update Item Availabilities
-    if (paymentStatus === "Paid") {
+    if (invoice.paymentStatus === "Paid") {
       for (const item of quote.items) {
         await prisma.item.update({
           where: { id: item.itemId },
@@ -140,7 +140,7 @@ export async function convertToInvoice(quoteId: string, invoiceNumber: string) {
           },
         });
       }
-    } else if (["Draft", "Partial", "Pending"].includes(paymentStatus)) {
+    } else if (["Draft", "Partial", "Pending"].includes(invoice.paymentStatus)) {
       for (const item of quote.items) {
         await prisma.item.update({
           where: { id: item.itemId },
