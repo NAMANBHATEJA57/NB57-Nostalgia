@@ -32,9 +32,7 @@ export default function Navbar() {
   return (
     <>
       <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/70 backdrop-blur-md border-b shadow-sm' : 'bg-white/0'}`}>
-        <div className="bg-blue-600 text-white text-xs font-medium py-2 px-4 text-center tracking-wide">
-          Standard Shipping: Additional ₹120 INR on all orders
-        </div>
+
         <div className="max-w-7xl mx-auto px-6 h-[80px] flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <Image 
