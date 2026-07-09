@@ -2,13 +2,22 @@ import { Metadata } from "next";
 import { CalculatorWorkspace } from "@/components/admin/calculator/CalculatorWorkspace";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Pricing Calculator | NB57's Nostalgia",
   description: "Calculate deal pricing and generate quotes.",
 };
 
-export default function CalculatorPage() {
+export default async function CalculatorPage({ searchParams }: { searchParams: { id?: string } }) {
+  let initialQuote = null;
+  if (searchParams.id) {
+    initialQuote = await prisma.quote.findUnique({
+      where: { id: searchParams.id },
+      include: { items: true },
+    });
+  }
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 print:p-0 print:space-y-0">
       <div className="flex items-center justify-between space-y-2 print:hidden">
@@ -17,7 +26,7 @@ export default function CalculatorPage() {
           View Saved Calculations
         </Button>
       </div>
-      <CalculatorWorkspace />
+      <CalculatorWorkspace initialQuote={initialQuote} />
     </div>
   );
 }

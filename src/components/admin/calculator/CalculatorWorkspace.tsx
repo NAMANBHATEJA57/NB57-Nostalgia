@@ -25,25 +25,39 @@ interface SelectedItem {
   coverImage: string;
 }
 
-export function CalculatorWorkspace() {
+export function CalculatorWorkspace({ initialQuote }: { initialQuote?: any }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   
-  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>(
+    initialQuote?.items.map((item: any) => ({
+      itemId: item.itemId,
+      itemName: item.itemName,
+      itemSku: item.itemSku,
+      itemCondition: item.itemCondition,
+      askingPrice: item.askingPrice,
+      sellingPrice: item.sellingPrice,
+      fairValueMin: 0,
+      fairValueMax: 0,
+      purchasePrice: 0,
+      quantity: item.quantity,
+      coverImage: "",
+    })) || []
+  );
   
-  const [discountType, setDiscountType] = useState<"percent" | "flat">("flat");
-  const [discountValue, setDiscountValue] = useState<number>(0);
-  const [shippingCharge, setShippingCharge] = useState<number>(0);
-  const [packagingCharge, setPackagingCharge] = useState<number>(0);
-  const [miscCharge, setMiscCharge] = useState<number>(0);
+  const [discountType, setDiscountType] = useState<"percent" | "flat">(initialQuote?.discountPercent ? "percent" : "flat");
+  const [discountValue, setDiscountValue] = useState<number>(initialQuote?.discountPercent || initialQuote?.discountAmount || 0);
+  const [shippingCharge, setShippingCharge] = useState<number>(initialQuote?.shippingCharge || 0);
+  const [packagingCharge, setPackagingCharge] = useState<number>(initialQuote?.packagingCharge || 0);
+  const [miscCharge, setMiscCharge] = useState<number>(initialQuote?.miscCharge || 0);
   
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [quoteTitle, setQuoteTitle] = useState("");
-  const [notes, setNotes] = useState("");
-  const [advancePaid, setAdvancePaid] = useState<number>(0);
+  const [customerName, setCustomerName] = useState(initialQuote?.customerName || "");
+  const [customerPhone, setCustomerPhone] = useState(initialQuote?.customerPhone || "");
+  const [quoteTitle, setQuoteTitle] = useState(initialQuote?.title || "");
+  const [notes, setNotes] = useState(initialQuote?.notes || "");
+  const [advancePaid, setAdvancePaid] = useState<number>(initialQuote?.advancePaid || 0);
   
   const [isSaving, setIsSaving] = useState(false);
 
@@ -139,6 +153,7 @@ export function CalculatorWorkspace() {
       advancePaid,
       notes,
       items: selectedItems,
+      ...(initialQuote?.id && { id: initialQuote.id }),
     });
     setIsSaving(false);
     if (result.success) {
@@ -172,6 +187,7 @@ export function CalculatorWorkspace() {
       advancePaid,
       notes,
       items: selectedItems,
+      ...(initialQuote?.id && { id: initialQuote.id }),
     });
     
     if (saveResult.success && saveResult.quoteId) {

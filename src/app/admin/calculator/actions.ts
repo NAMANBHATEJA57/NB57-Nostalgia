@@ -38,26 +38,49 @@ export async function searchItems(query: string) {
 
 export async function saveQuote(data: any) {
   try {
-    const { items, ...quoteData } = data;
+    const { id, items, ...quoteData } = data;
 
-    const quote = await prisma.quote.create({
-      data: {
-        ...quoteData,
-        items: {
-          create: items.map((item: any) => ({
-            itemId: item.itemId,
-            itemName: item.itemName,
-            itemSku: item.itemSku,
-            itemCondition: item.itemCondition,
-            quantity: item.quantity,
-            askingPrice: item.askingPrice,
-            sellingPrice: item.sellingPrice,
-          })),
+    let quote;
+    if (id) {
+      await prisma.quoteItem.deleteMany({ where: { quoteId: id } });
+      quote = await prisma.quote.update({
+        where: { id },
+        data: {
+          ...quoteData,
+          items: {
+            create: items.map((item: any) => ({
+              itemId: item.itemId,
+              itemName: item.itemName,
+              itemSku: item.itemSku,
+              itemCondition: item.itemCondition,
+              quantity: item.quantity,
+              askingPrice: item.askingPrice,
+              sellingPrice: item.sellingPrice,
+            })),
+          },
         },
-      },
-    });
+      });
+    } else {
+      quote = await prisma.quote.create({
+        data: {
+          ...quoteData,
+          items: {
+            create: items.map((item: any) => ({
+              itemId: item.itemId,
+              itemName: item.itemName,
+              itemSku: item.itemSku,
+              itemCondition: item.itemCondition,
+              quantity: item.quantity,
+              askingPrice: item.askingPrice,
+              sellingPrice: item.sellingPrice,
+            })),
+          },
+        },
+      });
+    }
 
     revalidatePath("/admin/calculator");
+    revalidatePath("/admin/calculator/saved");
     return { success: true, quoteId: quote.id };
   } catch (error) {
     console.error("Error saving quote:", error);

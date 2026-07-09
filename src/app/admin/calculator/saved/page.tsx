@@ -59,7 +59,7 @@ export default async function SavedQuotesPage() {
                   <TableCell>{format(new Date(quote.updatedAt), "dd MMM yyyy")}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" render={<Link href={`/admin/calculator?id=${quote.id}`} />}>
                         <Edit2 className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
