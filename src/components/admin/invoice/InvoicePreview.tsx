@@ -52,9 +52,6 @@ export function InvoicePreview({ data }: { data: PreviewData }) {
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-base font-bold tracking-tight">NB57&apos;s Nostalgia</h2>
-            <p className="text-[10px] text-muted-foreground mt-0.5">
-              India&apos;s Digital Archive of Vintage Collectibles
-            </p>
           </div>
           <div className="text-right">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Invoice</p>

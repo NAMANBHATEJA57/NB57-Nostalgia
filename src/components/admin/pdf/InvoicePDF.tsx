@@ -208,14 +208,16 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice, logoUrl, qrCode
         
         {/* Header */}
         <View style={styles.headerRow}>
-          <View>
+          <View style={{ flex: 1 }}>
             {logoUrl && <Image src={logoUrl} style={styles.logo} />}
             <Text style={styles.companyName}>NB57's Nostalgia</Text>
-            <Text style={styles.companyDetails}>123 Vintage Lane, History District</Text>
-            <Text style={styles.companyDetails}>New Delhi, DL 110001, India</Text>
+            {/* STORED BUSINESS DETAILS (HIDDEN FROM INVOICE)
+            <Text style={styles.companyDetails}>Professor Oak's Laboratory</Text>
+            <Text style={styles.companyDetails}>Pallet Town, Kanto Region</Text>
             <Text style={styles.companyDetails}>Email: contact@nb57nostalgia.com</Text>
-            <Text style={styles.companyDetails}>Phone: +91 98765 43210</Text>
+            <Text style={styles.companyDetails}>Phone: +91 9811535385</Text>
             <Text style={styles.companyDetails}>Website: www.nb57nostalgia.com</Text>
+            */}
           </View>
           <View style={styles.invoiceDetailsRight}>
             <Text style={styles.invoiceTitle}>INVOICE</Text>

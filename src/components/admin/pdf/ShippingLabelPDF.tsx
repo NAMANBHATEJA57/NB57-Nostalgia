@@ -97,8 +97,8 @@ export const ShippingLabelPDF: React.FC<ShippingLabelPDFProps> = ({ invoice, log
         <View style={styles.addressBox}>
           <Text style={styles.sectionTitle}>From:</Text>
           <Text style={styles.addressText}>NB57's Nostalgia</Text>
-          <Text style={styles.addressText}>123 Vintage Lane, History District</Text>
-          <Text style={styles.addressText}>New Delhi, DL 110001, IN</Text>
+          <Text style={styles.addressText}>Professor Oak's Laboratory</Text>
+          <Text style={styles.addressText}>Pallet Town, Kanto Region</Text>
         </View>
 
         {/* To Address */}
