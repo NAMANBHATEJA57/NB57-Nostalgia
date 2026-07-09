@@ -33,6 +33,7 @@ export default async function Home() {
     if (lower.includes('yu-gi-oh')) return 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjwAcOcJ7LT2lQqGYZjnTXzjZK4rwlcvQW3IO8JpZWPhm8Z3_LPVQ2CO5b&s=10';
     if (lower.includes('ben 10')) return 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyR6SW8d1bUW7wbpuQ8ozxb_G-91JlqfAfG7jXWs0K3Qty9Yf78gyyKCMz&s=10';
     if (lower.includes('bakugan')) return 'https://images.unsplash.com/photo-1618218168350-6e7c81151b64?q=80&w=800';
+    if (lower.includes('beyblade')) return 'https://m.media-amazon.com/images/M/MV5BZDY4YzZkYzEtNTAzNS00NTE0LWIxMDktNmM4MTFmNDQ0NmIzXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg';
     return 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?q=80&w=800';
   };
 
