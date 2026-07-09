@@ -73,7 +73,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background print:block print:min-h-0 print:h-auto">
       <KeyboardShortcuts />
       
       {/* Left Sidebar */}
@@ -137,7 +137,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto flex flex-col min-w-0">
+      <main className="flex-1 overflow-auto print:overflow-visible flex flex-col min-w-0">
         {children}
       </main>
     </div>
