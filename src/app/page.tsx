@@ -18,6 +18,12 @@ export default async function Home() {
     getStatistics()
   ]);
 
+  const sortedCategories = [...categories].sort((a, b) => {
+    if (a.name === 'Others') return 1;
+    if (b.name === 'Others') return -1;
+    return 0;
+  });
+
   const featuredItems = items.filter(i => i.featured || i.sealed).slice(0, 3);
 
   const getCategoryFallbackImage = (name: string) => {
@@ -81,7 +87,7 @@ export default async function Home() {
         </div>
         
         <div className="flex justify-center flex-wrap gap-4 md:gap-6">
-          {categories.slice(0, 8).map((category, index) => (
+          {sortedCategories.slice(0, 8).map((category, index) => (
             <Link href={`/collection?filter=${category.name.toLowerCase()}`} key={category.id} className="w-[320px] shrink group block cursor-pointer">
               <div className="relative aspect-square rounded-3xl overflow-hidden bg-slate-100 shadow-sm group-hover:shadow-xl transition-all duration-500 ease-out group-hover:-translate-y-2">
                 <div className="absolute inset-0">

@@ -244,12 +244,7 @@ export function ItemsTable({ items: initialItems, allCategories }: ItemsTablePro
         <Table className="w-full text-sm">
           <TableHeader className="bg-slate-100 sticky top-0 z-10 shadow-sm">
             <TableRow className="hover:bg-slate-100">
-              <TableHead className="w-12 text-center p-0">
-                <Checkbox 
-                  checked={selectedIds.length > 0 && selectedIds.length === filteredItems.length}
-                  onCheckedChange={handleSelectAll}
-                />
-              </TableHead>
+
               <TableHead className="w-16">Image</TableHead>
               <TableHead className="min-w-[120px]">Collection ID</TableHead>
               <TableHead className="min-w-[200px]">Item Name</TableHead>
@@ -265,22 +260,21 @@ export function ItemsTable({ items: initialItems, allCategories }: ItemsTablePro
           <TableBody>
             {filteredItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={11} className="h-48 text-center text-muted-foreground">
+                <TableCell colSpan={10} className="h-48 text-center text-muted-foreground">
                   No items found matching your criteria.
                 </TableCell>
               </TableRow>
             ) : (
               filteredItems.map(item => (
                 <TableRow key={item.id} className="group">
-                  <TableCell className="text-center">
-                    <Checkbox 
-                      checked={selectedIds.includes(item.id)}
-                      onCheckedChange={(c) => handleSelect(item.id, c as boolean)}
-                    />
-                  </TableCell>
+
                   <TableCell>
-                    <div className="w-10 h-10 relative rounded-md overflow-hidden bg-slate-100 border">
-                      <Image src={item.coverImage} alt={item.name} fill className="object-cover" />
+                    <div className="w-10 h-10 relative rounded-md overflow-hidden bg-slate-100 border flex items-center justify-center">
+                      {item.coverImage ? (
+                        <Image src={item.coverImage} alt={item.name} fill className="object-cover" />
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground">No img</span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="font-mono text-xs font-medium text-slate-500">

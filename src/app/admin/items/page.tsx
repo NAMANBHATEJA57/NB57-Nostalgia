@@ -10,22 +10,11 @@ export const dynamic = 'force-dynamic'; // Always fetch fresh data for admin
 export default async function ItemsPage() {
   const [items, categories] = await Promise.all([
     prisma.item.findMany({
-      select: {
-      id: true,
-      sku: true,
-      slug: true,
-      name: true,
-      coverImage: true,
-      availability: true,
-      condition: true,
-      askingPrice: true,
-      sealed: true,
-      featured: true,
-      series: true,
-      fairValueMax: true,
-      createdAt: true,
-      category: { select: { name: true } }
-    },
+      include: {
+        category: { select: { name: true } },
+        itemTags: { include: { tag: true } },
+        images: true
+      },
     orderBy: {
       createdAt: 'desc'
     }
@@ -40,7 +29,7 @@ export default async function ItemsPage() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Items</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Items ({items.length})</h2>
           <p className="text-muted-foreground mt-1">
             Manage your collectible inventory.
           </p>

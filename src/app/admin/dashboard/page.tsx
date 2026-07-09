@@ -31,7 +31,7 @@ export default async function DashboardPage() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <h2 className="text-3xl font-heading font-bold tracking-tight">Dashboard</h2>
           <p className="text-muted-foreground mt-1">
             Overview of your collection and recent activity.
           </p>
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalItems}</div>
+            <div className="text-3xl font-mono font-bold text-primary">{totalItems}</div>
             <p className="text-xs text-muted-foreground">In your collection</p>
           </CardContent>
         </Card>
@@ -55,7 +55,7 @@ export default async function DashboardPage() {
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{availableItems}</div>
+            <div className="text-3xl font-mono font-bold text-primary">{availableItems}</div>
             <p className="text-xs text-muted-foreground">Ready for sale/trade</p>
           </CardContent>
         </Card>
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
             <Tag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalCategories}</div>
+            <div className="text-3xl font-mono font-bold text-primary">{totalCategories}</div>
             <p className="text-xs text-muted-foreground">Active categories</p>
           </CardContent>
         </Card>
@@ -75,7 +75,7 @@ export default async function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{estimatedValue.toLocaleString('en-IN')}</div>
+            <div className="text-3xl font-mono font-bold text-primary">₹{estimatedValue.toLocaleString('en-IN')}</div>
             <p className="text-xs text-muted-foreground">Based on asking price</p>
           </CardContent>
         </Card>
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
             {recentlyAdded.length > 0 ? (
               <div className="space-y-4">
                 {recentlyAdded.map(item => (
-                  <div key={item.id} className="flex items-center gap-4 border-b pb-4 last:border-0 last:pb-0">
+                  <div key={item.id} className="flex items-center gap-4 border-b border-border/50 pb-4 last:border-0 last:pb-0 hover:bg-accent/5 p-2 rounded-lg transition-colors">
                     <div className="h-10 w-10 rounded overflow-hidden bg-slate-100 flex-shrink-0 relative">
                       <Image src={item.coverImage} alt={item.name} fill sizes="40px" className="object-cover" />
                     </div>
@@ -108,7 +108,7 @@ export default async function DashboardPage() {
                       <p className="text-sm font-medium truncate">{item.name}</p>
                       <p className="text-xs text-muted-foreground truncate">{item.category?.name || 'Uncategorized'}</p>
                     </div>
-                    <div className="text-sm font-medium whitespace-nowrap">
+                    <div className="text-sm font-mono font-bold text-primary whitespace-nowrap">
                       {item.askingPrice ? `₹${item.askingPrice}` : '-'}
                     </div>
                   </div>

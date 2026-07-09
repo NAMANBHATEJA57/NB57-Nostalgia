@@ -1,0 +1,436 @@
+[
+  {
+    "sku": "NB57-0014",
+    "name": "Articuno Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Articuno",
+    "description": "Vintage Articuno promotional flip card."
+  },
+  {
+    "sku": "NB57-0018",
+    "name": "Shellder Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Shellder",
+    "description": "Vintage Shellder promotional flip card."
+  },
+  {
+    "sku": "NB57-0016",
+    "name": "Magikarp Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Magikarp",
+    "description": "Vintage Magikarp promotional flip card."
+  },
+  {
+    "sku": "NB57-0017",
+    "name": "Krabby Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Krabby",
+    "description": "Vintage Krabby promotional flip card."
+  },
+  {
+    "sku": "NB57-0019",
+    "name": "Seadra Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Seadra",
+    "description": "Vintage Seadra promotional flip card."
+  },
+  {
+    "sku": "NB57-0009",
+    "name": "Togepi Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Togepi",
+    "description": "Vintage Togepi promotional flip card."
+  },
+  {
+    "sku": "NB57-0008",
+    "name": "Lickitung Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Lickitung",
+    "description": "Vintage Lickitung promotional flip card."
+  },
+  {
+    "sku": "NB57-0001",
+    "name": "Dragonite Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Dragonite",
+    "description": "Vintage Dragonite promotional flip card."
+  },
+  {
+    "sku": "NB57-0007",
+    "name": "Tauros Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Tauros",
+    "description": "Vintage Tauros promotional flip card."
+  },
+  {
+    "sku": "NB57-0006",
+    "name": "Ditto Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Ditto",
+    "description": "Vintage Ditto promotional flip card."
+  },
+  {
+    "sku": "NB57-0005",
+    "name": "Electabuzz Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Electrode",
+    "description": "Vintage Electabuzz promotional flip card."
+  },
+  {
+    "sku": "NB57-0004",
+    "name": "Magnemite Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Magnemite",
+    "description": "Vintage Magnemite promotional flip card."
+  },
+  {
+    "sku": "NB57-0012",
+    "name": "Tangela Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Tangela",
+    "description": "Vintage Tangela promotional flip card."
+  },
+  {
+    "sku": "NB57-0013",
+    "name": "Exeggcute Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Exeggcute",
+    "description": "Vintage Exeggcute promotional flip card."
+  },
+  {
+    "sku": "NB57-0011",
+    "name": "Beedrill Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Beedrill",
+    "description": "Vintage Beedrill promotional flip card."
+  },
+  {
+    "sku": "NB57-0010",
+    "name": "Scyther Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Scyther",
+    "description": "Vintage Scyther promotional flip card."
+  },
+  {
+    "sku": "NB57-0023",
+    "name": "Golbat Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Golbat",
+    "description": "Vintage Golbat promotional flip card."
+  },
+  {
+    "sku": "NB57-0029",
+    "name": "Teddiursa Round Tazo",
+    "series": "Pokemon Tazos",
+    "character": "Teddiursa",
+    "description": "Vintage round tazo featuring Teddiursa."
+  },
+  {
+    "sku": "NB57-0025",
+    "name": "Hitmonchan Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Hitmonchan",
+    "description": "Vintage Hitmonchan promotional flip card."
+  },
+  {
+    "sku": "NB57-0027",
+    "name": "Mew Round Tazo",
+    "series": "Pokemon Tazos",
+    "character": "Mew",
+    "description": "Vintage round tazo featuring Mew."
+  },
+  {
+    "sku": "NB57-0031",
+    "name": "Sudowoodo Round Tazo",
+    "series": "Pokemon Tazos",
+    "character": "Sudowoodo",
+    "description": "Vintage round tazo featuring Sudowoodo."
+  },
+  {
+    "sku": "NB57-0030",
+    "name": "Murkrow Round Tazo",
+    "series": "Pokemon Tazos",
+    "character": "Murkrow",
+    "description": "Vintage round tazo featuring Murkrow."
+  },
+  {
+    "sku": "NB57-0026",
+    "name": "Dugtrio Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Dugtrio",
+    "description": "Vintage Dugtrio promotional flip card."
+  },
+  {
+    "sku": "NB57-0055",
+    "name": "Sealed Ben 10 Disc - Ben Tennyson",
+    "series": "Cheetos Disc Collection",
+    "character": "Kevin Levin",
+    "description": "Factory sealed Ben 10 disc featuring Ben Tennyson."
+  },
+  {
+    "sku": "NB57-0056",
+    "name": "Sealed Ben 10 Disc - XLR8",
+    "series": "Cheetos Disc Collection",
+    "character": "Unknown Alien 1",
+    "description": "Factory sealed Ben 10 disc featuring XLR8."
+  },
+  {
+    "sku": "NB57-0092",
+    "name": "Magician of Black Chaos",
+    "series": "Yu-Gi-Oh!",
+    "character": "Magician of Black Chaos",
+    "description": "Tazo Number: 14\nBrand: Cheetos\nSeries: Yu-Gi-Oh!\nCountry: India\nType: Tazo"
+  },
+  {
+    "sku": "NB57-0093",
+    "name": "Magician of Black Chaos",
+    "series": "Yu-Gi-Oh!",
+    "character": "Magician of Black Chaos",
+    "description": "Tazo Number: 14\nBrand: Cheetos\nSeries: Yu-Gi-Oh!\nCountry: India\nType: Tazo\n\nNotes: Duplicate copy with more visible wear."
+  },
+  {
+    "sku": "NB57-0057",
+    "name": "Sealed Ben 10 Disc - Wildmutt",
+    "series": "Cheetos Disc Collection",
+    "character": "Unknown Alien 2",
+    "description": "Factory sealed Ben 10 disc featuring Wildmutt."
+  },
+  {
+    "sku": "NB57-0047",
+    "name": "Sealed Ben 10 Puzzle Card - Wildmutt",
+    "series": "Cheetos Puzzle Cards",
+    "character": "Wildmutt",
+    "description": "Factory sealed puzzle card featuring Wildmutt."
+  },
+  {
+    "sku": "NB57-0046",
+    "name": "Sealed Ben 10 Puzzle Card - XLR8",
+    "series": "Cheetos Puzzle Cards",
+    "character": "XLR8",
+    "description": "Factory sealed puzzle card featuring XLR8."
+  },
+  {
+    "sku": "NB57-0043",
+    "name": "Sealed Ben 10 Puzzle Card - Upgrade",
+    "series": "Cheetos Puzzle Cards",
+    "character": "Upgrade",
+    "description": "Factory sealed puzzle card featuring Upgrade."
+  },
+  {
+    "sku": "NB57-0044",
+    "name": "Sealed Ben 10 Puzzle Card - Upchuck",
+    "series": "Cheetos Puzzle Cards",
+    "character": "Four Arms",
+    "description": "Factory sealed puzzle card featuring Upchuck."
+  },
+  {
+    "sku": "NB57-0042",
+    "name": "Sealed Ben 10 Puzzle Card - Unidentified (Broken)",
+    "series": "Cheetos Puzzle Cards",
+    "character": "Diamondhead",
+    "description": "Factory sealed puzzle card featuring  Unidentified (Broken)."
+  },
+  {
+    "sku": "NB57-0045",
+    "name": "Sealed Ben 10 Puzzle Card - Rath",
+    "series": "Cheetos Puzzle Cards",
+    "character": "Four Arms (Duplicate)",
+    "description": "Factory sealed puzzle card featuring Rath."
+  },
+  {
+    "sku": "NB57-0067",
+    "name": "2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo no 26",
+    "series": "Promotional",
+    "character": "Ed Edd n Eddy Skidz",
+    "description": "a vintage 2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo"
+  },
+  {
+    "sku": "NB57-0015",
+    "name": "Gyarados Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Gyarados",
+    "description": "Vintage Gyarados promotional flip card."
+  },
+  {
+    "sku": "NB57-0024",
+    "name": "Machoke Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Machoke",
+    "description": "Vintage Machoke promotional flip card."
+  },
+  {
+    "sku": "NB57-0020",
+    "name": "Slowbro Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Slowbro",
+    "description": "Vintage Slowbro promotional flip card."
+  },
+  {
+    "sku": "NB57-0002",
+    "name": "Pikachu Flip Card",
+    "series": "Cheetos Pokemon Jenga",
+    "character": "Pikachu",
+    "description": "Vintage Pikachu promotional flip card."
+  },
+  {
+    "sku": "NB57-0028",
+    "name": "Ariados Round Tazo",
+    "series": "Pokemon Tazos",
+    "character": "Ariados",
+    "description": "Vintage round tazo featuring Ariados."
+  },
+  {
+    "sku": "NB57-0048",
+    "name": "Sealed Ben 10 Puzzle Card - Ben Tennyson",
+    "series": "Cheetos Puzzle Cards",
+    "character": "Ben Tennyson",
+    "description": "Factory sealed puzzle card featuring Ben Tennyson."
+  },
+  {
+    "sku": "NB57-0074",
+    "name": "Sealed Ben 10 Disc - Gwen Alt Design",
+    "series": "Cheetos Disc Collection",
+    "character": "Gwen",
+    "description": "Factory sealed Ben 10 disc featuring Gwen."
+  },
+  {
+    "sku": "NB57-0075",
+    "name": "Sealed Ben 10 Disc - Wildmutt 1",
+    "series": "Cheetos Disc Collection",
+    "character": "Unknown Alien 2",
+    "description": "Factory sealed Ben 10 disc featuring Wildmutt."
+  },
+  {
+    "sku": "NB57-0061",
+    "name": "Sealed Bakugan Disc - Unknown Variant A",
+    "series": "Cheetos Promotion",
+    "character": "Unknown Variant A",
+    "description": "Factory sealed Bakugan promotional disc."
+  },
+  {
+    "sku": "NB57-0060",
+    "name": "Sealed Bakugan Disc - Dragonoid Variant 1",
+    "series": "Cheetos Promotion",
+    "character": "Winged Dragon Variant",
+    "description": "Factory sealed Bakugan promotional disc."
+  },
+  {
+    "sku": "NB57-0062",
+    "name": "Sealed Bakugan Disc - Unknown Variant B",
+    "series": "Cheetos Promotion",
+    "character": "Unknown Variant B",
+    "description": "Factory sealed Bakugan promotional disc."
+  },
+  {
+    "sku": "NB57-0063",
+    "name": "Sealed Bakugan Disc - Unknown Variant C",
+    "series": "Cheetos Promotion",
+    "character": "Unknown Variant C",
+    "description": "Factory sealed Bakugan promotional disc."
+  },
+  {
+    "sku": "NB57-0083",
+    "name": "2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo no 43",
+    "series": "Promotional",
+    "character": "Ed Edd n Eddy Skidz",
+    "description": "a vintage 2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo"
+  },
+  {
+    "sku": "NB57-0086",
+    "name": "Harpie Lady Sisters",
+    "series": "Yu-Gi-Oh!",
+    "character": "Harpie Lady Sisters",
+    "description": "Tazo Number: 63\nBrand: Cheetos\nSeries: Yu-Gi-Oh!\nCountry: India\nType: Tazo"
+  },
+  {
+    "sku": "NB57-0078",
+    "name": "Sealed Bakugan Disc - Dragonoid Variant 2",
+    "series": "Cheetos Promotion",
+    "character": "Winged Dragon Variant",
+    "description": "Factory sealed Bakugan promotional disc."
+  },
+  {
+    "sku": "NB57-0049",
+    "name": "Sealed Ben 10 Disc - Gwen",
+    "series": "Cheetos Disc Collection",
+    "character": "Gwen",
+    "description": "Factory sealed Ben 10 disc featuring Gwen."
+  },
+  {
+    "sku": "NB57-0080",
+    "name": "2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo no 21",
+    "series": "Promotional",
+    "character": "Ed Edd n Eddy Skidz",
+    "description": "a vintage 2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo"
+  },
+  {
+    "sku": "NB57-0081",
+    "name": "2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo no 33",
+    "series": "Promotional",
+    "character": "Ed Edd n Eddy Skidz",
+    "description": "a vintage 2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo"
+  },
+  {
+    "sku": "NB57-0082",
+    "name": "2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo no 14",
+    "series": "Promotional",
+    "character": "Ed Edd n Eddy Skidz",
+    "description": "a vintage 2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo"
+  },
+  {
+    "sku": "NB57-0084",
+    "name": "2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo no 31",
+    "series": "Promotional",
+    "character": "Ed Edd n Eddy Skidz",
+    "description": "a vintage 2005 Haldiram's \"S.K.I.D.Z\" Boleto Tazo"
+  },
+  {
+    "sku": "NB57-0087",
+    "name": "Thousand Eyes Idol",
+    "series": "Yu-Gi-Oh!",
+    "character": "Thousand Eyes Idol",
+    "description": "Tazo Number: 36\nBrand: Cheetos\nSeries: Yu-Gi-Oh!\nCountry: India\nType: Tazo"
+  },
+  {
+    "sku": "NB57-0079",
+    "name": "Sealed Bakugan Disc - Dragonoid Variant 3",
+    "series": "Cheetos Promotion",
+    "character": "Winged Dragon Variant",
+    "description": "Factory sealed Bakugan promotional disc."
+  },
+  {
+    "sku": "NB57-0089",
+    "name": "Battle Steer",
+    "series": "Yu-Gi-Oh!",
+    "character": "Battle Steer",
+    "description": "Tazo Number: 26\r\nBrand: Cheetos\r\nSeries: Yu-Gi-Oh!\r\nCountry: India\r\nType: Tazo"
+  },
+  {
+    "sku": "NB57-0088",
+    "name": "Summoned Skull",
+    "series": "Yu-Gi-Oh!",
+    "character": "Summoned Skull",
+    "description": "Tazo Number: 16\nBrand: Cheetos\nSeries: Yu-Gi-Oh!\nCountry: India\nType: Tazo"
+  },
+  {
+    "sku": "NB57-0091",
+    "name": "Griffore",
+    "series": "Yu-Gi-Oh!",
+    "character": "Griffore",
+    "description": "Tazo Number: 38\nBrand: Cheetos\nSeries: Yu-Gi-Oh!\nCountry: India\nType: Tazo"
+  },
+  {
+    "sku": "NB57-0090",
+    "name": "Celtic Guardian",
+    "series": "Yu-Gi-Oh!",
+    "character": "Celtic Guardian",
+    "description": "Tazo Number: 11\r\nBrand: Cheetos\r\nSeries: Yu-Gi-Oh!\r\nCountry: India\r\nType: Tazo"
+  },
+  {
+    "sku": "NB57-0085",
+    "name": "Opened Bakugan Disc - Dragonoid Variant 2 ",
+    "series": "Cheetos Promotion",
+    "character": "Winged Dragon Variant",
+    "description": "Factory sealed Bakugan promotional disc."
+  }
+]

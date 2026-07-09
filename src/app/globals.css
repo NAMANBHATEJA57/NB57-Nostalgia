@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-fira-sans), var(--font-sans);
+  --font-mono: var(--font-fira-code), var(--font-mono);
+  --font-heading: var(--font-fira-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,72 +49,68 @@
 }
 
 :root {
+  /* Minimal Black & White + Gold Theme */
   --background: #FAFAF8;
-  --foreground: #111827;
+  --foreground: #171717; /* Minimal Black */
   --card: #FFFFFF;
-  --card-foreground: #111827;
+  --card-foreground: #171717;
   --popover: #FFFFFF;
-  --popover-foreground: #111827;
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 16px;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: #171717;
+  --primary: #171717;
+  --primary-foreground: #FFFFFF;
+  --secondary: #404040;
+  --secondary-foreground: #FFFFFF;
+  --muted: #E8ECF0;
+  --muted-foreground: #737373;
+  --accent: #A16207; /* Accent Gold */
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --border: #E5E5E5;
+  --input: #E5E5E5;
+  --ring: #171717;
+  --chart-1: #A16207;
+  --chart-2: #404040;
+  --chart-3: #737373;
+  --chart-4: #E8ECF0;
+  --chart-5: #171717;
+  --radius: 12px;
+  --sidebar: #FAFAF8;
+  --sidebar-foreground: #171717;
+  --sidebar-primary: #171717;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E8ECF0;
+  --sidebar-accent-foreground: #171717;
+  --sidebar-border: #E5E5E5;
+  --sidebar-ring: #171717;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #171717;
+  --foreground: #FAFAF8;
+  --card: #262626;
+  --card-foreground: #FAFAF8;
+  --popover: #262626;
+  --popover-foreground: #FAFAF8;
+  --primary: #FAFAF8;
+  --primary-foreground: #171717;
+  --secondary: #404040;
+  --secondary-foreground: #FAFAF8;
+  --muted: #404040;
+  --muted-foreground: #A3A3A3;
+  --accent: #A16207;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --border: #404040;
+  --input: #404040;
+  --ring: #FAFAF8;
+  --sidebar: #171717;
+  --sidebar-foreground: #FAFAF8;
+  --sidebar-primary: #FAFAF8;
+  --sidebar-primary-foreground: #171717;
+  --sidebar-accent: #404040;
+  --sidebar-accent-foreground: #FAFAF8;
+  --sidebar-border: #404040;
+  --sidebar-ring: #FAFAF8;
 }
 
 @layer base {
@@ -127,4 +123,13 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Glassmorphism utility for admin panel */
+.admin-bg {
+  background-color: #f8fafc;
+  background-image: radial-gradient(at 40% 20%, hsla(28,100%,74%,0.15) 0px, transparent 50%),
+                    radial-gradient(at 80% 0%, hsla(189,100%,56%,0.1) 0px, transparent 50%),
+                    radial-gradient(at 0% 50%, hsla(355,100%,93%,0.2) 0px, transparent 50%);
+  background-attachment: fixed;
 }
