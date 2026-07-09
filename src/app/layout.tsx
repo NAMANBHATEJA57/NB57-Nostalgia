@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter, Fira_Sans, Fira_Code } from "next/font/google";
 import { Toaster } from "sonner";
+import { InterestedItemsProvider } from "@/components/context/InterestedItemsContext";
 import "./globals.css";
 
 const inter = Inter({
@@ -41,8 +42,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${cormorantGaramond.variable} ${firaSans.variable} ${firaCode.variable} font-sans antialiased`}
       >
-        {children}
-        <Toaster />
+        <InterestedItemsProvider>
+          {children}
+          <Toaster />
+        </InterestedItemsProvider>
       </body>
     </html>
   );

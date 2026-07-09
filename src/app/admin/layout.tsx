@@ -14,8 +14,10 @@ import {
   Users,
   CalendarClock,
   TrendingUp,
-  BookOpen,
+  Calculator,
   Search,
+  MessageCircle,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KeyboardShortcuts } from "@/components/admin/KeyboardShortcuts";
@@ -34,6 +36,8 @@ const NAV_SECTIONS = [
     label: "Sales",
     items: [
       { href: "/admin/invoices", icon: FileText, label: "Invoices" },
+      { href: "/admin/leads", icon: MessageCircle, label: "Leads" },
+      { href: "/admin/calculator", icon: Calculator, label: "Calculator" },
       { href: "/admin/customers", icon: Users, label: "Customers" },
       { href: "/admin/reservations", icon: CalendarClock, label: "Reservations" },
     ],

@@ -8,7 +8,8 @@ import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Search, Filter, BoxSelect, Loader2 } from "lucide-react";
+import { Search, Filter, BoxSelect, Loader2, Heart } from "lucide-react";
+import { useInterestedItems } from '@/components/context/InterestedItemsContext';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -39,6 +40,12 @@ export function CollectionClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const { items: interestedItems, addItem, removeItem, isInterested } = useInterestedItems();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [items, setItems] = useState(initialItems);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -242,6 +249,35 @@ export function CollectionClient({
                   className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                 />
                 <div className="absolute inset-0 ring-1 ring-inset ring-black/5"></div>
+                
+                <div className="absolute top-3 right-3 z-10 flex gap-2">
+                  {mounted && (
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (isInterested(item.id)) {
+                          removeItem(item.id);
+                        } else {
+                          addItem({
+                            id: item.id,
+                            slug: item.slug,
+                            name: item.name,
+                            sku: item.sku || `NB57-${item.id.slice(-6).toUpperCase()}`,
+                            condition: item.condition,
+                            availability: item.availability,
+                            askingPrice: item.askingPrice || 0,
+                            image: item.coverImage || undefined
+                          });
+                        }
+                      }}
+                      className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center hover:bg-white transition-colors shadow-sm group/heart"
+                    >
+                      <Heart className={`w-4 h-4 transition-colors ${isInterested(item.id) ? 'fill-red-500 text-red-500' : 'text-slate-500 group-hover/heart:text-red-500'}`} />
+                    </button>
+                  )}
+                </div>
+
                 <div className="absolute top-3 left-3 z-10 flex gap-2">
                   {item.sealed ? (
                     <Badge className="bg-amber-100 text-amber-800 border-amber-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm bg-amber-100/90 shadow-sm">Factory Sealed</Badge>

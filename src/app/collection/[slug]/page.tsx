@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { Suspense } from 'react';
 import { getItemBySlug, getRelatedItems } from '@/lib/data';
+import { ProductActions } from './ProductActions';
 
 const ImageGallery = dynamic(() => import('@/components/ui/ImageGallery').then(mod => mod.ImageGallery), {
   ssr: true,
@@ -255,15 +256,7 @@ export default async function CollectionItemPage({ params }: { params: Promise<{
                 )}
               </div>
 
-              {item.availability === 'Available' ? (
-                <Button size="lg" className="w-full rounded-full text-base font-medium h-14 bg-slate-900 hover:bg-blue-600 transition-colors duration-500 hover:shadow-lg hover:shadow-blue-900/20 active:scale-95">
-                  Inquire to Acquire
-                </Button>
-              ) : (
-                <Button size="lg" variant="outline" className="w-full rounded-full text-base font-medium h-14 border-slate-300 text-slate-500 cursor-not-allowed">
-                  Currently {item.availability}
-                </Button>
-              )}
+              <ProductActions item={item} />
             </div>
             
           </div>

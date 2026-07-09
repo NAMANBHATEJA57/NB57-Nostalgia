@@ -144,6 +144,8 @@ model Item {
   blogPosts    BlogRelatedItem[]
   invoiceItems InvoiceItem[]
   reservations Reservation[]
+  quoteItems   QuoteItem[]
+  leadItems    LeadItem[]
 
   @@index([slug])
   @@index([categoryId])
@@ -221,6 +223,7 @@ model Customer {
   notes        String?       @db.Text
   invoices     Invoice[]
   reservations Reservation[]
+  quotes       Quote[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -481,3 +484,110 @@ model BlogComment {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// ─── Calculator Quotes ─────────────────────────────────────────
+
+model Quote {
+  id              String   @id @default(cuid())
+  title           String?  // Optional name for the calculation
+  
+  // Optional customer details (can be temporary text or link to Customer model)
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  customerName    String?
+  customerPhone   String?
+  
+  // Totals
+  subtotal        Float    @default(0)
+  discountPercent Float?
+  discountAmount  Float    @default(0)
+  shippingCharge  Float    @default(0)
+  packagingCharge Float    @default(0)
+  miscCharge      Float    @default(0)
+  grandTotal      Float    @default(0)
+  
+  // Negotiation / Deal specific
+  advancePaid     Float    @default(0)
+  
+  status          String   @default("Saved") // Saved, Converted
+  notes           String?  @db.Text
+  
+  items           QuoteItem[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([status])
+  @@index([createdAt])
+  @@index([customerId])
+}
+
+model QuoteItem {
+  id            String  @id @default(cuid())
+  quoteId       String
+  quote         Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  itemId        String
+  item          Item    @relation(fields: [itemId], references: [id])
+  quantity      Int     @default(1)
+  
+  // Snapshots for the quote
+  itemName      String
+  itemSku       String
+  itemCondition String?
+  askingPrice   Float   @default(0)
+  sellingPrice  Float   @default(0)
+  
+  createdAt     DateTime @default(now())
+  
+  @@index([quoteId])
+  @@index([itemId])
+}
+
+// ─── WhatsApp Inquiry Leads ────────────────────────────────────
+
+model Lead {
+  id             String   @id @default(cuid())
+  leadNumber     String   @unique  // NB57-LD-YYYYMM-XXXX
+  date           DateTime @default(now())
+  
+  // Buyer Details
+  buyerName      String
+  phone          String
+  city           String?
+  state          String?
+  country        String?  @default("India")
+  email          String?
+  notes          String?  @db.Text
+  
+  estimatedValue Float    @default(0)
+  status         String   @default("New") // New, Contacted, Negotiating, Reserved, Converted, Lost
+  
+  items          LeadItem[]
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([status])
+  @@index([createdAt])
+  @@index([phone])
+}
+
+model LeadItem {
+  id            String  @id @default(cuid())
+  leadId        String
+  lead          Lead    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  itemId        String
+  item          Item    @relation(fields: [itemId], references: [id])
+  
+  // Snapshots for the inquiry
+  itemName      String
+  itemSku       String
+  itemCondition String?
+  estimatedPrice Float  @default(0)
+  
+  createdAt     DateTime @default(now())
+  
+  @@index([leadId])
+  @@index([itemId])
+}
+

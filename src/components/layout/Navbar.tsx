@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState, useEffect } from 'react';
-import { Search } from "lucide-react";
+import { Search, Heart } from "lucide-react";
+import { useInterestedItems } from '../context/InterestedItemsContext';
 import dynamic from 'next/dynamic';
 
 const FloatingSearch = dynamic(() => import('../ui/FloatingSearch').then(mod => mod.FloatingSearch), {
@@ -13,6 +14,12 @@ const FloatingSearch = dynamic(() => import('../ui/FloatingSearch').then(mod => 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const { items } = useInterestedItems();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,8 +46,17 @@ export default function Navbar() {
               priority
             />
           </Link>
-          <div className="flex items-center space-x-8 text-sm font-medium text-slate-700">
+          <div className="flex items-center space-x-6 text-sm font-medium text-slate-700">
             <Link href="/collection" className="hover:text-black transition-colors">Collections</Link>
+            <Link href="/inquiry" className="hover:text-black transition-colors flex items-center group relative">
+              <Heart className="w-4 h-4 mr-1.5 group-hover:fill-red-50 text-slate-500 group-hover:text-red-500 transition-colors" />
+              <span>Interested Items</span>
+              {mounted && items.length > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px]">
+                  {items.length}
+                </span>
+              )}
+            </Link>
             <button onClick={() => setSearchOpen(true)} className="hover:text-black transition-colors flex items-center justify-center p-2 rounded-full hover:bg-slate-100 transition-colors" aria-label="Search">
               <Search className="w-4 h-4" />
             </button>

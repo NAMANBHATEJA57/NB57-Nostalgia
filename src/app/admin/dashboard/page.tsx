@@ -9,6 +9,8 @@ import { LatestInvoicesWidget } from "@/components/admin/dashboard/LatestInvoice
 import { ReservationsWidget } from "@/components/admin/dashboard/ReservationsWidget";
 import { ActivityTimeline } from "@/components/admin/dashboard/ActivityTimeline";
 import { MostValuableItems } from "@/components/admin/dashboard/MostValuableItems";
+import { QuotesWidget } from "@/components/admin/dashboard/QuotesWidget";
+import { LeadsWidget } from "@/components/admin/dashboard/LeadsWidget";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +45,10 @@ export default async function DashboardPage() {
     expiringReservations,
     activityLogs,
     mostValuable,
+    quoteAggregate,
+    quoteCount,
+    leadsAggregate,
+    convertedLeads,
   ] = await Promise.all([
     // ─── Stat Cards ─────────────────────────────────────────
     prisma.item.count(),
@@ -154,10 +160,36 @@ export default async function DashboardPage() {
         category: { select: { name: true } },
       },
     }),
+    prisma.quote.aggregate({
+      _count: {
+        id: true,
+      },
+      _sum: {
+        discountAmount: true,
+        grandTotal: true,
+      },
+      where: {
+        status: "Saved",
+      },
+    }),
+    prisma.quote.count({ where: { status: "Converted" } }),
+    prisma.lead.aggregate({
+      _count: { id: true },
+      _sum: { estimatedValue: true },
+      where: { status: { not: "Lost" } },
+    }),
+    prisma.lead.count({ where: { status: "Converted" } }),
   ]);
 
+  const quoteStats = {
+    savedQuotes: quoteAggregate._count.id || 0,
+    convertedQuotes: quoteCount || 0,
+    averageDiscount: (quoteAggregate._count.id > 0) ? (quoteAggregate._sum.discountAmount || 0) / quoteAggregate._count.id : 0,
+    averageDealSize: (quoteAggregate._count.id > 0) ? (quoteAggregate._sum.grandTotal || 0) / quoteAggregate._count.id : 0,
+  };
+
   // ─── Process Data ───────────────────────────────────────────
-  const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+  const categoryMap = new Map(categories.map((c: any) => [c.id, c.name]));
   const categoryData = categoryGroups
     .map((g: any) => ({
       name: categoryMap.get(g.categoryId) || "Uncategorized",
@@ -252,13 +284,22 @@ export default async function DashboardPage() {
             <LatestItemsWidget items={latestItems} />
           </div>
 
-          {/* Widgets Row 2: Invoices + Reservations */}
-          <div className="grid gap-6 lg:grid-cols-2">
+          {/* Widgets Row 2: Invoices + Reservations + Quotes */}
+          <div className="grid gap-6 lg:grid-cols-3">
             <LatestInvoicesWidget invoices={latestInvoices} />
             <ReservationsWidget reservations={expiringReservations} />
+            </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <LeadsWidget 
+              totalLeads={leadsAggregate._count.id || 0}
+              convertedLeads={convertedLeads}
+              averageValue={(leadsAggregate._count.id > 0) ? (leadsAggregate._sum.estimatedValue || 0) / leadsAggregate._count.id : 0}
+            />
+            <QuotesWidget stats={quoteStats} />
           </div>
 
-          {/* Bottom Row: Most Valuable + Activity Timeline */}
+          {/* Activity & Valuable Items */}
           <div className="grid gap-6 lg:grid-cols-2">
             <MostValuableItems items={mostValuable} />
             <ActivityTimeline logs={activityLogs} />
