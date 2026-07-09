@@ -1,150 +1,265 @@
 import { prisma } from "@/lib/prisma";
-import { TopBar } from "@/components/admin/dashboard/TopBar";
 import { StatCards } from "@/components/admin/dashboard/StatCards";
-import { InventoryBarChart, ValueAreaChart } from "@/components/admin/dashboard/DashboardCharts";
-import { CollectionBreakdown, ConditionBreakdown } from "@/components/admin/dashboard/BreakdownCharts";
-import { HighestValuedTable } from "@/components/admin/dashboard/HighestValuedTable";
-import { NeedsAttention } from "@/components/admin/dashboard/NeedsAttention";
+import { RevenueChart, ProfitChart, ItemsAddedChart, ValueGrowthChart } from "@/components/admin/dashboard/DashboardCharts";
+import { CategoryPieChart } from "@/components/admin/dashboard/BreakdownCharts";
+import { QuickActions } from "@/components/admin/dashboard/QuickActions";
+import { RecentSalesWidget } from "@/components/admin/dashboard/RecentSalesWidget";
+import { LatestItemsWidget } from "@/components/admin/dashboard/LatestItemsWidget";
+import { LatestInvoicesWidget } from "@/components/admin/dashboard/LatestInvoicesWidget";
+import { ReservationsWidget } from "@/components/admin/dashboard/ReservationsWidget";
+import { ActivityTimeline } from "@/components/admin/dashboard/ActivityTimeline";
+import { MostValuableItems } from "@/components/admin/dashboard/MostValuableItems";
 
-import { ProgressionTracker } from "@/components/admin/dashboard/ProgressionTracker";
-
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
   const [
+    // Stat card data
     totalItems,
-    availableItems,
-    sealedItems,
-    valueAggregation,
-    highestValued,
+    totalInventoryValue,
+    todaysRevenue,
+    totalRevenue,
+    totalProfit,
+    itemsSold,
+    itemsReserved,
+    totalInvoices,
+    pendingPayments,
+    draftInvoices,
+    recentlyAdded,
+    soldThisMonth,
+    totalCategories,
+    // Chart data
     categoryGroups,
-    conditionGroups,
     categories,
-    missingImages,
-    missingPrice,
-    missingDesc,
-    missingSEO
+    monthlyLedgerEntries,
+    // Widget data
+    recentSales,
+    latestItems,
+    latestInvoices,
+    expiringReservations,
+    activityLogs,
+    mostValuable,
   ] = await Promise.all([
+    // ─── Stat Cards ─────────────────────────────────────────
     prisma.item.count(),
-    prisma.item.count({ where: { availability: "Available" } }),
-    prisma.item.count({ where: { sealed: true } }),
     prisma.item.aggregate({ _sum: { askingPrice: true } }),
+    prisma.ledgerEntry.aggregate({
+      where: { type: "Revenue", reversed: false, createdAt: { gte: startOfToday } },
+      _sum: { amount: true },
+    }),
+    prisma.ledgerEntry.aggregate({
+      where: { type: "Revenue", reversed: false },
+      _sum: { amount: true },
+    }),
+    prisma.ledgerEntry.aggregate({
+      where: { type: "Profit", reversed: false },
+      _sum: { amount: true },
+    }),
+    prisma.item.count({ where: { availability: "Sold" } }),
+    prisma.item.count({ where: { availability: "Reserved" } }),
+    prisma.invoice.count(),
+    prisma.invoice.count({ where: { paymentStatus: "Pending" } }),
+    prisma.invoice.count({ where: { paymentStatus: "Draft" } }),
+    prisma.item.count({ where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } }),
+    prisma.item.count({ where: { availability: "Sold", soldDate: { gte: startOfMonth } } }),
+    prisma.category.count(),
+
+    // ─── Chart Data ─────────────────────────────────────────
+    prisma.item.groupBy({ by: ["categoryId"], _count: { id: true }, _sum: { askingPrice: true } }),
+    prisma.category.findMany({ select: { id: true, name: true } }),
+    prisma.ledgerEntry.findMany({
+      where: { 
+        createdAt: { gte: new Date(now.getFullYear(), 0, 1) },
+        reversed: false,
+        type: { in: ["Revenue", "Profit"] }
+      },
+      select: { createdAt: true, amount: true, type: true },
+      orderBy: { createdAt: "asc" },
+    }),
+
+    // ─── Widgets ────────────────────────────────────────────
+    prisma.invoice.findMany({
+      where: { paymentStatus: { in: ["Paid", "Partial"] } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        invoiceNumber: true,
+        grandTotal: true,
+        paymentStatus: true,
+        createdAt: true,
+        customer: { select: { name: true } },
+      },
+    }),
     prisma.item.findMany({
-      where: { askingPrice: { not: null } },
-      orderBy: { askingPrice: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: 5,
       select: {
         id: true,
         name: true,
+        sku: true,
         coverImage: true,
-        category: { select: { name: true } },
         askingPrice: true,
-        fairValueMax: true,
-        availability: true
-      }
+        availability: true,
+        category: { select: { name: true } },
+        createdAt: true,
+      },
     }),
-    prisma.item.groupBy({
-      by: ['categoryId'],
-      _count: { id: true }
+    prisma.invoice.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        invoiceNumber: true,
+        grandTotal: true,
+        paymentStatus: true,
+        createdAt: true,
+        customer: { select: { name: true } },
+      },
     }),
-    prisma.item.groupBy({
-      by: ['condition'],
-      _count: { id: true }
+    prisma.reservation.findMany({
+      where: { status: "Active", expiryDate: { lte: new Date(Date.now() + 48 * 60 * 60 * 1000) } },
+      orderBy: { expiryDate: "asc" },
+      take: 5,
+      select: {
+        id: true,
+        customerName: true,
+        expiryDate: true,
+        status: true,
+        deposit: true,
+        item: { select: { name: true, sku: true, coverImage: true } },
+        customer: { select: { name: true } },
+      },
     }),
-    prisma.category.findMany({ select: { id: true, name: true } }),
-    prisma.item.count({ where: { OR: [{ coverImage: '' }] } }),
-    prisma.item.count({ where: { askingPrice: null } }),
-    prisma.item.count({ where: { OR: [{ description: '' }] } }),
-    prisma.item.count({ where: { OR: [{ metaTitle: null }, { metaDescription: null }] } })
+    prisma.activityLog.findMany({
+      orderBy: { timestamp: "desc" },
+      take: 10,
+      select: { id: true, action: true, entity: true, entityId: true, details: true, admin: true, timestamp: true },
+    }),
+    prisma.item.findMany({
+      where: { askingPrice: { not: null } },
+      orderBy: { askingPrice: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        name: true,
+        sku: true,
+        coverImage: true,
+        askingPrice: true,
+        availability: true,
+        category: { select: { name: true } },
+      },
+    }),
   ]);
-  
-  const estimatedValue = valueAggregation._sum.askingPrice || 0;
 
-  // Process category data
-  const categoryMap = new Map(categories.map(c => [c.id, c.name]));
-  const categoryData = categoryGroups.map(g => ({
-    name: categoryMap.get(g.categoryId) || 'Uncategorized',
-    total: g._count.id
-  })).sort((a, b) => b.total - a.total);
+  // ─── Process Data ───────────────────────────────────────────
+  const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+  const categoryData = categoryGroups
+    .map((g) => ({
+      name: categoryMap.get(g.categoryId) || "Uncategorized",
+      count: g._count.id,
+      value: g._sum.askingPrice || 0,
+    }))
+    .sort((a, b) => b.count - a.count);
 
-  const collectionData = categoryData.map(d => ({ name: d.name, value: d.total }));
+  const monthlyData = Array.from({ length: 12 }).map((_, i) => {
+    const month = new Date(now.getFullYear(), i, 1);
+    const monthName = month.toLocaleDateString("en-US", { month: "short" });
+    const monthEntries = monthlyLedgerEntries.filter((entry) => {
+      const d = new Date(entry.createdAt);
+      return d.getMonth() === i;
+    });
+    
+    const revenue = monthEntries.filter(e => e.type === "Revenue").reduce((sum, e) => sum + e.amount, 0);
+    const profit = monthEntries.filter(e => e.type === "Profit").reduce((sum, e) => sum + e.amount, 0);
 
-  // Extract progression data by mapping category names (case-insensitive check)
-  const progressionData = {
-    pokemon: 0,
-    yugioh: 0,
-    ben10: 0,
-    bakugan: 0,
-    beyblade: 0
-  };
-
-  categoryData.forEach(d => {
-    const lowerName = d.name.toLowerCase();
-    if (lowerName.includes('pokemon')) progressionData.pokemon += d.total;
-    if (lowerName.includes('yu-gi-oh') || lowerName.includes('yugioh')) progressionData.yugioh += d.total;
-    if (lowerName.includes('ben 10') || lowerName.includes('ben10')) progressionData.ben10 += d.total;
-    if (lowerName.includes('bakugan')) progressionData.bakugan += d.total;
-    if (lowerName.includes('beyblade') || lowerName.includes('spinner')) progressionData.beyblade += d.total;
+    return { month: monthName, revenue, profit };
   });
 
-  // Process condition data
-  const conditionData = conditionGroups.map(g => ({
-    condition: g.condition || 'Unknown',
-    count: g._count.id,
-    percentage: totalItems > 0 ? Math.round((g._count.id / totalItems) * 100) : 0
-  })).sort((a, b) => b.count - a.count);
-
-  // Mock 30-day value trend
-  const valueData = Array.from({ length: 14 }).map((_, i) => ({
-    date: new Date(Date.now() - (13 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    value: Math.round(estimatedValue * (0.95 + (i * 0.003) + Math.random() * 0.01))
-  }));
-
-  const attentionData = {
-    missingImages,
-    missingPrice,
-    missingDesc,
-    missingSEO,
-    totalItems
+  // Stats object
+  const stats = {
+    totalItems,
+    totalInventoryValue: totalInventoryValue._sum.askingPrice || 0,
+    todaysRevenue: todaysRevenue._sum.amount || 0,
+    totalRevenue: totalRevenue._sum.amount || 0,
+    totalProfit: totalProfit._sum.amount || 0,
+    itemsSold,
+    itemsReserved,
+    totalInvoices,
+    pendingPayments,
+    draftInvoices,
+    recentlyAdded,
+    soldThisMonth,
+    totalCategories,
   };
+
+  // Get time-based greeting
+  const hour = now.getHours();
+  const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
 
   return (
     <div className="flex flex-col min-h-0 h-full">
-      <TopBar />
+      {/* Top Bar */}
+      <div className="h-14 flex items-center justify-between px-8 border-b border-border bg-card flex-shrink-0">
+        <div>
+          <h1 className="text-sm font-semibold text-foreground">Dashboard</h1>
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {now.toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+        </div>
+      </div>
+
       <div className="flex-1 overflow-auto p-8 bg-background">
+        {/* Greeting */}
         <div className="mb-8">
-          <h2 className="text-2xl font-sans font-semibold tracking-tight text-foreground">Good Evening, Naman.</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            {greeting}, Naman.
+          </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Archive Overview • Last sync: Just now
+            Here&apos;s what&apos;s happening with your archive today.
           </p>
         </div>
 
-        <div className="space-y-6">
-          <StatCards 
-            totalItems={totalItems} 
-            totalValue={estimatedValue} 
-            sealedItems={sealedItems} 
-            availableItems={availableItems} 
-          />
+        <div className="space-y-8">
+          {/* Quick Actions */}
+          <QuickActions />
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-            <InventoryBarChart data={categoryData} />
-            <ValueAreaChart data={valueData} />
+          {/* Stat Cards */}
+          <StatCards stats={stats} />
+
+          {/* Charts Row 1: Revenue + Profit */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <RevenueChart data={monthlyData} />
+            <ProfitChart data={monthlyData} />
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-            <ConditionBreakdown data={conditionData} />
-            <CollectionBreakdown data={collectionData} />
+          {/* Charts Row 2: Category Pie + Items Added + Value Growth */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            <CategoryPieChart data={categoryData} />
+            <ItemsAddedChart data={monthlyData} />
+            <ValueGrowthChart totalValue={stats.totalInventoryValue} />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-8">
-            <HighestValuedTable items={highestValued} />
-            <ProgressionTracker data={progressionData} />
+          {/* Widgets Row 1: Recent Sales + Latest Items */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <RecentSalesWidget sales={recentSales} />
+            <LatestItemsWidget items={latestItems} />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-8">
-            <div className="col-span-1 lg:col-span-5"></div>
-            <NeedsAttention data={attentionData} />
+          {/* Widgets Row 2: Invoices + Reservations */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <LatestInvoicesWidget invoices={latestInvoices} />
+            <ReservationsWidget reservations={expiringReservations} />
+          </div>
+
+          {/* Bottom Row: Most Valuable + Activity Timeline */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <MostValuableItems items={mostValuable} />
+            <ActivityTimeline logs={activityLogs} />
           </div>
         </div>
       </div>

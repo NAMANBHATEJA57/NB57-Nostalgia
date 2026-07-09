@@ -17,6 +17,8 @@ export default function Footer() {
           <ul className="space-y-3">
             <li><Link href="/collection" className="hover:text-black transition-colors">Collections</Link></li>
             <li><Link href="/collection?filter=sealed" className="hover:text-black transition-colors">Factory Sealed</Link></li>
+            <li><Link href="/collection?condition=Played" className="hover:text-black transition-colors">Played Items</Link></li>
+            <li><Link href="/collection?condition=Near Mint / Not Played" className="hover:text-black transition-colors">Mint Condition</Link></li>
           </ul>
         </div>
         

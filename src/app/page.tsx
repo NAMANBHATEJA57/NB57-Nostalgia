@@ -42,14 +42,14 @@ export default async function Home() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden pt-24">
+      <section className="relative min-h-[100svh] flex flex-col items-center justify-center text-center px-4 sm:px-6 overflow-hidden pt-36 pb-16">
         {/* Background Grid */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
-          <div className="grid grid-cols-4 gap-8 rotate-12 scale-150 h-[150vh]">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 md:gap-8 rotate-12 scale-110 md:scale-150 h-[150vh]">
             {[...Array(4)].map((_, colIndex) => (
               <div 
                 key={colIndex} 
-                className="flex flex-col gap-8"
+                className={`flex flex-col gap-4 md:gap-8 ${colIndex === 3 ? 'hidden sm:flex' : 'flex'}`}
                 style={{ 
                   animation: `marquee-vertical ${30 + (colIndex % 3) * 10}s linear infinite`,
                   animationDirection: colIndex % 2 === 0 ? 'normal' : 'reverse'
@@ -58,13 +58,13 @@ export default async function Home() {
                 {[...Array(12)].map((_, rowIndex) => {
                   const item = heroItems[(colIndex * 12 + rowIndex) % Math.max(heroItems.length, 1)];
                   return (
-                    <div key={rowIndex} className="w-64 h-64 shrink-0 bg-slate-100 rounded-2xl overflow-hidden relative opacity-[15%] shadow-sm">
+                    <div key={rowIndex} className="w-28 h-28 sm:w-32 sm:h-32 md:w-64 md:h-64 shrink-0 bg-slate-100 rounded-2xl md:rounded-3xl overflow-hidden relative opacity-10 md:opacity-[15%] shadow-sm">
                       {item?.coverImage && (
                         <Image 
                           src={item.coverImage}
                           alt=""
                           fill
-                          sizes="256px"
+                          sizes="(max-width: 768px) 128px, 256px"
                           className="object-cover" 
                         />
                       )}
@@ -76,24 +76,28 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
-          <h1 className="font-cormorant text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[1.1]">
+        {/* Overlay for better readability on mobile */}
+        <div className="absolute inset-0 bg-[#FAFAF8]/70 md:bg-[#FAFAF8]/20 pointer-events-none z-[5]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(250,250,248,0.95)_0%,rgba(250,250,248,0)_70%)] pointer-events-none z-[5]" />
+
+        <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center w-full mt-10 md:mt-0">
+          <h1 className="font-cormorant text-5xl sm:text-6xl md:text-8xl font-bold tracking-tight mb-4 md:mb-8 leading-[1.05] text-slate-900 drop-shadow-sm md:drop-shadow-none">
             NB57's Nostalgia
           </h1>
-          <p className="text-xl md:text-2xl font-sans text-slate-600 mb-6 max-w-2xl font-light leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl font-sans text-slate-700 md:text-slate-600 mb-4 md:mb-6 max-w-2xl font-medium md:font-light leading-relaxed px-2">
             India's Digital Archive of Vintage Collectibles
           </p>
-          <p className="text-lg md:text-xl text-slate-500 mb-12 max-w-2xl font-light">
+          <p className="text-base sm:text-lg md:text-xl text-slate-600 md:text-slate-500 mb-8 md:mb-12 max-w-2xl font-medium md:font-light leading-relaxed px-4 md:px-0">
             A curated collection of Tazos, Trading Cards, Promotional Merchandise, Collectibles and Childhood Memories from the 90s & 2000s.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <Link href="/collection">
-              <Button size="lg" className="rounded-full px-10 h-14 text-base font-medium bg-slate-900 text-white hover:bg-slate-800 transition-all hover:-translate-y-1 hover:shadow-lg">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-center w-full sm:w-auto px-4 sm:px-0">
+            <Link href="/collection" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto rounded-full px-8 md:px-10 h-12 md:h-14 text-sm md:text-base font-medium bg-slate-900 text-white hover:bg-slate-800 transition-all hover:-translate-y-1 hover:shadow-lg">
                 Browse Collection
               </Button>
             </Link>
-            <Link href="/collection?filter=categories">
-              <Button size="lg" variant="outline" className="rounded-full px-10 h-14 text-base font-medium border-slate-300 hover:bg-slate-100 transition-all">
+            <Link href="/collection?filter=categories" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-full px-8 md:px-10 h-12 md:h-14 text-sm md:text-base font-medium border-slate-300 bg-white/60 backdrop-blur-sm hover:bg-white hover:border-slate-400 transition-all">
                 View Categories
               </Button>
             </Link>
@@ -163,11 +167,13 @@ export default async function Home() {
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                   />
                   <div className="absolute inset-0 ring-1 ring-inset ring-black/5"></div>
-                  {item.sealed && (
-                    <div className="absolute top-3 left-3 z-10">
+                  <div className="absolute top-3 left-3 z-10 flex gap-2">
+                    {item.sealed ? (
                       <Badge className="bg-amber-100 text-amber-800 border-amber-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm bg-amber-100/90 shadow-sm">Factory Sealed</Badge>
-                    </div>
-                  )}
+                    ) : item.condition ? (
+                      <Badge className="bg-white/90 text-slate-700 border-slate-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm shadow-sm">{item.condition}</Badge>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="flex flex-col flex-1 p-5 space-y-3">
                   <div className="flex justify-between items-start">
@@ -219,11 +225,13 @@ export default async function Home() {
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                   />
                   <div className="absolute inset-0 ring-1 ring-inset ring-black/5"></div>
-                  {item.sealed && (
-                    <div className="absolute top-3 left-3 z-10">
+                  <div className="absolute top-3 left-3 z-10 flex gap-2">
+                    {item.sealed ? (
                       <Badge className="bg-amber-100 text-amber-800 border-amber-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm bg-amber-100/90 shadow-sm">Factory Sealed</Badge>
-                    </div>
-                  )}
+                    ) : item.condition ? (
+                      <Badge className="bg-white/90 text-slate-700 border-slate-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm shadow-sm">{item.condition}</Badge>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="flex flex-col flex-1 p-5 space-y-3">
                   <div className="flex justify-between items-start">

@@ -25,12 +25,14 @@ export function CollectionClient({
   initialHasMore,
   filterOptions,
   initialFilter,
+  initialCondition,
   initialSearch
 }: { 
   initialItems: any[];
   initialHasMore: boolean;
   filterOptions: { categories: string[], statuses: string[], conditions: string[] };
   initialFilter?: string;
+  initialCondition?: string;
   initialSearch?: string;
 }) {
   const router = useRouter();
@@ -46,7 +48,7 @@ export function CollectionClient({
   const [search, setSearch] = useState(initialSearch || "");
   const [categoryFilter, setCategoryFilter] = useState<string[]>(initialFilter && initialFilter !== 'sealed' ? [initialFilter] : []);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [conditionFilter, setConditionFilter] = useState<string[]>([]);
+  const [conditionFilter, setConditionFilter] = useState<string[]>(initialCondition ? [initialCondition] : []);
   
   // Debounce search update to URL
   useEffect(() => {
@@ -104,9 +106,8 @@ export function CollectionClient({
     router.push(pathname);
   };
 
-  // We perform local filtering of loaded items until we fully implement server side advanced filters.
-  // The server handles 'q' (search) and 'filter' (single category from URL). 
-  // We can filter the items array locally for the checkboxes for instant feedback.
+  // We perform local filtering for instant feedback, but we also fetch from the server
+  // to ensure we get items that might be on page 2+
   const filteredItems = items.filter((item: any) => {
     const catName = item.category?.name || 'Uncategorized';
     const matchesCategory = categoryFilter.length === 0 || categoryFilter.includes(catName) || categoryFilter.includes(catName.toLowerCase());
@@ -115,6 +116,33 @@ export function CollectionClient({
 
     return matchesCategory && matchesStatus && matchesCondition;
   });
+
+  useEffect(() => {
+    // Skip the initial mount fetch since we have initialItems
+    if (categoryFilter.length === (initialFilter && initialFilter !== 'sealed' ? 1 : 0) &&
+        statusFilter.length === 0 &&
+        conditionFilter.length === (initialCondition ? 1 : 0) &&
+        search === (initialSearch || "")) {
+      return;
+    }
+
+    const fetchFiltered = async () => {
+      startTransition(async () => {
+        const filters: any = { search };
+        if (categoryFilter.length > 0) filters.category = categoryFilter;
+        if (statusFilter.length > 0) filters.status = statusFilter;
+        if (conditionFilter.length > 0) filters.condition = conditionFilter;
+
+        const { items: newItems, hasMore: more } = await getCollectionItems(1, filters);
+        setItems(newItems);
+        setHasMore(more);
+        setPage(1);
+      });
+    };
+
+    const timer = setTimeout(fetchFiltered, 300);
+    return () => clearTimeout(timer);
+  }, [categoryFilter, statusFilter, conditionFilter, search]);
 
   return (
     <>
@@ -150,6 +178,7 @@ export function CollectionClient({
                     if (checked) setStatusFilter([...statusFilter, status]);
                     else setStatusFilter(statusFilter.filter(s => s !== status));
                   }}
+                  onSelect={(e) => e.preventDefault()}
                   className="rounded-lg cursor-pointer"
                 >
                   {status}
@@ -167,6 +196,7 @@ export function CollectionClient({
                     if (checked) setCategoryFilter([...categoryFilter, category]);
                     else setCategoryFilter(categoryFilter.filter(c => c !== category && c !== category.toLowerCase()));
                   }}
+                  onSelect={(e) => e.preventDefault()}
                   className="rounded-lg cursor-pointer"
                 >
                   {category}
@@ -186,6 +216,7 @@ export function CollectionClient({
                         if (checked) setConditionFilter([...conditionFilter, condition]);
                         else setConditionFilter(conditionFilter.filter(c => c !== condition));
                       }}
+                      onSelect={(e) => e.preventDefault()}
                       className="rounded-lg cursor-pointer"
                     >
                       {condition}
@@ -211,11 +242,13 @@ export function CollectionClient({
                   className="object-cover transition-transform duration-500 ease-out group-hover:scale-105" 
                 />
                 <div className="absolute inset-0 ring-1 ring-inset ring-black/5"></div>
-                {item.sealed && (
-                  <div className="absolute top-3 left-3 z-10">
+                <div className="absolute top-3 left-3 z-10 flex gap-2">
+                  {item.sealed ? (
                     <Badge className="bg-amber-100 text-amber-800 border-amber-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm bg-amber-100/90 shadow-sm">Factory Sealed</Badge>
-                  </div>
-                )}
+                  ) : item.condition ? (
+                    <Badge className="bg-white/90 text-slate-700 border-slate-200 px-2 py-0.5 text-xs font-medium backdrop-blur-sm shadow-sm">{item.condition}</Badge>
+                  ) : null}
+                </div>
               </div>
               <div className="flex flex-col flex-1 p-5 space-y-3">
                 <div className="flex justify-between items-start">

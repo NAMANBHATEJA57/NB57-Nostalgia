@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { unstable_cache } from 'next/cache';
+import { sortAlphabetically, sortConditions } from '@/lib/sort';
 
 const ITEMS_PER_PAGE = 24;
 const REVALIDATE_TIME = 3600;
@@ -76,13 +77,13 @@ export const getCollectionFilters = unstable_cache(
       })
     ]);
 
-    const statuses = ['Available', 'Reserved', 'Sold', 'Not for Sale'];
+    const statuses = ['Available', 'Reserved', 'Sold', 'Not for Sale']; // Availability uses custom static order
     const conditions = distinctItems.map(i => i.condition).filter(Boolean);
 
     return { 
-      categories: categories.map(c => c.name), 
+      categories: sortAlphabetically(categories.map(c => c.name)), 
       statuses, 
-      conditions 
+      conditions: sortConditions(conditions) 
     };
   },
   ['collection-filters'],

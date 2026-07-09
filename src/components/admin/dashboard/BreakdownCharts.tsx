@@ -1,77 +1,75 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
-interface BreakdownProps {
-  collectionData: { name: string; value: number }[];
-  conditionData: { condition: string; count: number; percentage: number }[];
+interface CategoryData {
+  name: string;
+  count: number;
+  value: number;
 }
 
-const COLORS = ['#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE', '#E0E7FF'];
+const COLORS = [
+  "#2563EB", "#3B82F6", "#60A5FA", "#93C5FD", "#BFDBFE",
+  "#818CF8", "#A78BFA", "#C4B5FD", "#6366F1", "#4F46E5",
+];
 
-export function CollectionBreakdown({ data }: { data: BreakdownProps["collectionData"] }) {
+export function CategoryPieChart({ data }: { data: CategoryData[] }) {
+  const total = data.reduce((sum, d) => sum + d.count, 0);
+
   return (
-    <Card className="rounded-xl shadow-sm border-border col-span-1 lg:col-span-3">
-      <CardHeader>
-        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Collection Breakdown
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[250px] w-full">
+    <div className="rounded-xl border border-border bg-card p-6">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-foreground">Categories</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Distribution across categories</p>
+      </div>
+      <div className="flex items-center gap-6">
+        <div className="h-48 w-48 flex-shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={data}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
-                dataKey="value"
-                stroke="none"
+                innerRadius={45}
+                outerRadius={75}
+                paddingAngle={2}
+                dataKey="count"
               >
-                {data.map((entry, index) => (
+                {data.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip 
-                contentStyle={{ borderRadius: "8px", border: "1px solid var(--border)", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload?.length) return null;
+                  const d = payload[0].payload as CategoryData;
+                  return (
+                    <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
+                      <p className="text-xs font-medium text-foreground">{d.name}</p>
+                      <p className="text-xs text-muted-foreground">{d.count} items</p>
+                    </div>
+                  );
+                }}
               />
-              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }}/>
             </PieChart>
           </ResponsiveContainer>
         </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export function ConditionBreakdown({ data }: { data: BreakdownProps["conditionData"] }) {
-  return (
-    <Card className="rounded-xl shadow-sm border-border col-span-1 lg:col-span-4 flex flex-col justify-between">
-      <CardHeader>
-        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Condition Breakdown
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 flex-1 flex flex-col justify-center pb-8">
-        {data.map((item, i) => (
-          <div key={item.condition} className="space-y-1">
-            <div className="flex justify-between text-sm">
-              <span className="font-medium text-foreground">{item.condition}</span>
-              <span className="text-muted-foreground">{item.percentage}% ({item.count})</span>
-            </div>
-            <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-accent rounded-full transition-all duration-500 ease-out" 
-                style={{ width: `${item.percentage}%`, opacity: 1 - (i * 0.15) }}
+        <div className="flex-1 space-y-1.5 max-h-48 overflow-y-auto">
+          {data.slice(0, 8).map((d, i) => (
+            <div key={d.name} className="flex items-center gap-2 text-xs">
+              <div
+                className="h-2.5 w-2.5 rounded-sm flex-shrink-0"
+                style={{ backgroundColor: COLORS[i % COLORS.length] }}
               />
+              <span className="text-muted-foreground truncate flex-1">{d.name}</span>
+              <span className="font-medium text-foreground tabular-nums">{d.count}</span>
+              <span className="text-muted-foreground w-8 text-right">
+                {total > 0 ? Math.round((d.count / total) * 100) : 0}%
+              </span>
             </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

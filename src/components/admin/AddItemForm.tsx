@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useTransition, useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Save, Loader2, Tag as TagIcon, Plus } from "lucide-react";
+import { Save, Loader2, Tag as TagIcon, Plus, RefreshCcw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { itemFormSchema, type ItemFormValues } from "@/lib/validations";
 import { createItem } from "@/actions/item";
@@ -18,6 +18,7 @@ import { RichTextEditor } from "./RichTextEditor";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Category } from "@prisma/client";
+import { calculateAskingPrice } from "@/lib/pricing";
 
 export function AddItemForm({ categories }: { categories: Category[] }) {
   const router = useRouter();
@@ -44,8 +45,34 @@ export function AddItemForm({ categories }: { categories: Category[] }) {
       hideFromPublic: false,
       status: "Draft",
       tags: [],
+      sealed: false,
     },
   });
+
+  const [isPriceManuallyEdited, setIsPriceManuallyEdited] = useState(false);
+
+  const watchedName = useWatch({ control: form.control, name: "name" }) || "";
+  const watchedCondition = useWatch({ control: form.control, name: "condition" }) || "";
+  const watchedSealed = useWatch({ control: form.control, name: "sealed" }) || false;
+  const watchedCategoryId = useWatch({ control: form.control, name: "categoryId" }) || "";
+  const watchedSeries = useWatch({ control: form.control, name: "series" }) || "";
+
+  useEffect(() => {
+    if (isPriceManuallyEdited) return;
+
+    // Find category name
+    const categoryName = categories.find((c) => c.id === watchedCategoryId)?.name || "";
+
+    const newPrice = calculateAskingPrice({
+      name: watchedName,
+      condition: watchedCondition,
+      sealed: watchedSealed,
+      categoryName,
+      series: watchedSeries,
+    });
+
+    form.setValue("askingPrice", newPrice, { shouldValidate: true });
+  }, [watchedName, watchedCondition, watchedSealed, watchedCategoryId, watchedSeries, categories, isPriceManuallyEdited, form]);
 
   async function onSubmit(values: ItemFormValues) {
     if (values.images && values.images.length > 0) {
@@ -343,9 +370,33 @@ export function AddItemForm({ categories }: { categories: Category[] }) {
                     name="askingPrice"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Asking Price (₹)</FormLabel>
+                        <div className="flex items-center justify-between">
+                          <FormLabel>Asking Price (₹)</FormLabel>
+                          {isPriceManuallyEdited && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-auto p-0 text-xs text-blue-600 hover:text-blue-800"
+                              onClick={() => {
+                                setIsPriceManuallyEdited(false);
+                              }}
+                            >
+                              <RefreshCcw className="w-3 h-3 mr-1" />
+                              Reset
+                            </Button>
+                          )}
+                        </div>
                         <FormControl>
-                          <Input type="number" {...field} value={field.value || ''} />
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            value={field.value || ''} 
+                            onChange={(e) => {
+                              setIsPriceManuallyEdited(true);
+                              field.onChange(e);
+                            }}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -705,6 +756,20 @@ export function AddItemForm({ categories }: { categories: Category[] }) {
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>Hide from Public</FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sealed"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Sealed Product</FormLabel>
                       </div>
                     </FormItem>
                   )}

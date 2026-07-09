@@ -62,7 +62,8 @@ export const getCategoriesWithCounts = unstable_cache(
         _count: {
           select: { items: true }
         }
-      }
+      },
+      orderBy: { name: 'asc' }
     });
   },
   ['categories-with-counts'],

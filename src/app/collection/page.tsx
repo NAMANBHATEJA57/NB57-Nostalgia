@@ -10,6 +10,7 @@ export default async function CollectionPage({
 }) {
   const params = await searchParams;
   const filter = params.filter as string | undefined;
+  const condition = params.condition as string | undefined;
   const search = params.q as string | undefined;
   
   // Construct filter object
@@ -23,6 +24,10 @@ export default async function CollectionPage({
     }
   }
 
+  if (condition) {
+    filters.condition = [condition];
+  }
+
   // ✅ Parallel fetch — all 3 queries run simultaneously
   const [{ items, hasMore }, filterOptions, totalCount] = await Promise.all([
     getCollectionItems(1, filters),
@@ -33,7 +38,7 @@ export default async function CollectionPage({
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Navbar />
-      <div className="py-24 px-6 max-w-7xl mx-auto flex-1 w-full">
+      <div className="pt-36 pb-24 px-6 max-w-7xl mx-auto flex-1 w-full">
         <div className="mb-12">
           <h1 className="font-cormorant text-5xl font-bold mb-4">The Collection</h1>
           <p className="text-muted-foreground text-lg">
@@ -47,6 +52,7 @@ export default async function CollectionPage({
             initialHasMore={hasMore}
             filterOptions={filterOptions}
             initialFilter={filter}
+            initialCondition={condition}
             initialSearch={search}
           />
         </Suspense>

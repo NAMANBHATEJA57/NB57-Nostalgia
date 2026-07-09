@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Item, Image as ItemImage, Category } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { updateItem } from '@/app/admin/items/[id]/actions';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, RefreshCcw } from 'lucide-react';
+import { calculateAskingPrice } from '@/lib/pricing';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type ItemWithImages = Item & { images: ItemImage[] };
 
@@ -23,6 +25,27 @@ export function EditItemForm({ item, categories }: EditItemFormProps) {
   const [extraImages, setExtraImages] = useState<string[]>(
     item.images.sort((a, b) => a.order - b.order).map(img => img.url)
   );
+
+  const [name, setName] = useState(item.name || "");
+  const [condition, setCondition] = useState(item.condition || "Excellent");
+  const [series, setSeries] = useState(item.series || "");
+  const [sealed, setSealed] = useState(item.sealed || false);
+  const [askingPrice, setAskingPrice] = useState<number | string>(item.askingPrice ?? "");
+  const [isPriceManuallyEdited, setIsPriceManuallyEdited] = useState(true);
+
+  useEffect(() => {
+    if (isPriceManuallyEdited) return;
+
+    const categoryName = categoryId ? categories.find(c => c.id === categoryId)?.name || "" : "";
+    const newPrice = calculateAskingPrice({
+      name,
+      condition,
+      sealed,
+      categoryName,
+      series
+    });
+    setAskingPrice(newPrice);
+  }, [name, condition, sealed, categoryId, series, categories, isPriceManuallyEdited]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,18 +87,41 @@ export function EditItemForm({ item, categories }: EditItemFormProps) {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="name">Item Name</Label>
-            <Input id="name" name="name" defaultValue={item.name} required />
+            <Input id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="askingPrice">Asking Price (₹)</Label>
-            <Input id="askingPrice" name="askingPrice" type="number" defaultValue={item.askingPrice || ''} />
+            <div className="flex items-center justify-between">
+              <Label htmlFor="askingPrice">Asking Price (₹)</Label>
+              {isPriceManuallyEdited && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto p-0 text-xs text-blue-600 hover:text-blue-800"
+                  onClick={() => setIsPriceManuallyEdited(false)}
+                >
+                  <RefreshCcw className="w-3 h-3 mr-1" />
+                  Reset
+                </Button>
+              )}
+            </div>
+            <Input 
+              id="askingPrice" 
+              name="askingPrice" 
+              type="number" 
+              value={askingPrice} 
+              onChange={(e) => {
+                setIsPriceManuallyEdited(true);
+                setAskingPrice(e.target.value);
+              }} 
+            />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="categoryId">Category</Label>
-            <Select name="categoryId" value={categoryId} onValueChange={setCategoryId}>
+            <Select name="categoryId" value={categoryId || undefined} onValueChange={setCategoryId}>
               <SelectTrigger>
                 <span className="flex flex-1 text-left line-clamp-1">
                   {categoryId ? categories.find(c => c.id === categoryId)?.name : "Select category"}
@@ -90,12 +136,25 @@ export function EditItemForm({ item, categories }: EditItemFormProps) {
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="series">Series</Label>
+            <Input id="series" name="series" value={series} onChange={(e) => setSeries(e.target.value)} />
+          </div>
+          <div className="flex items-center space-x-2 pt-8">
+            <Checkbox 
+              id="sealed" 
+              checked={sealed} 
+              onCheckedChange={(c) => setSealed(c === true)} 
+            />
+            <input type="hidden" name="sealed" value={sealed ? "true" : "false"} />
+            <Label htmlFor="sealed">Sealed Product</Label>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="condition">Condition</Label>
-            <Select name="condition" defaultValue={item.condition}>
+            <Select name="condition" value={condition} onValueChange={(v) => v && setCondition(v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select condition" />
               </SelectTrigger>

@@ -7,6 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Authentication ────────────────────────────────────────────
+
 model User {
   id        String   @id @default(cuid())
   name      String?
@@ -17,20 +19,26 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+// ─── Categories ────────────────────────────────────────────────
+
 model Category {
   id             String   @id @default(cuid())
   slug           String   @unique
   name           String
-  description    String?
+  description    String?  @db.Text
   bannerImage    String?
   thumbnailImage String?
   icon           String?
   sortOrder      Int      @default(0)
   featured       Boolean  @default(false)
+  seoTitle       String?
+  seoDescription String?  @db.Text
   items          Item[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+
+// ─── Tags ──────────────────────────────────────────────────────
 
 model Tag {
   id        String    @id @default(cuid())
@@ -50,9 +58,11 @@ model ItemTag {
   @@id([itemId, tagId])
 }
 
+// ─── Items (Collectibles Inventory) ────────────────────────────
+
 model Item {
   id             String   @id @default(cuid())
-  sku            String   @unique // Auto-generated NB57-XXXX
+  sku            String   @unique // Auto-generated NB57-XXXX (Collection ID)
   slug           String   @unique
   name           String
   description    String   @db.Text
@@ -65,8 +75,15 @@ model Item {
   character      String?
   manufacturer   String?
   releaseYear    Int?
+  country        String?
+  language       String?
+  material       String?
+  edition        String?
+  variant        String?
+  finish         String?
   condition      String
   availability   String   @default("Available") // Available, Reserved, Sold, Not for Sale
+  storageLocation String?
 
   // Pricing
   askingPrice      Float?
@@ -74,6 +91,7 @@ model Item {
   fairValueMax     Float?
   highestSeenPrice Float?
   lowestSeenPrice  Float?
+  lastSoldPrice    Float?
   priceConfidence  String?
   priceSource      String?
 
@@ -88,6 +106,10 @@ model Item {
 
   notes String? @db.Text
 
+  // Physical
+  weight     Float?   // in grams
+  dimensions String?  // LxWxH in cm
+
   // Flags
   featured       Boolean @default(false)
   showOnHomepage Boolean @default(false)
@@ -100,6 +122,7 @@ model Item {
   promo          Boolean @default(false)
   duplicate      Boolean @default(false)
   hidden         Boolean @default(false)
+  archived       Boolean @default(false)
 
   quantity   Int    @default(1)
   coverImage String
@@ -107,6 +130,7 @@ model Item {
   // SEO
   metaTitle       String?
   metaDescription String?
+  metaKeywords    String?
   openGraphImage  String?
 
   createdAt DateTime @default(now())
@@ -118,13 +142,19 @@ model Item {
   views        ItemView[]
   sales        Sale[]
   blogPosts    BlogRelatedItem[]
+  invoiceItems InvoiceItem[]
+  reservations Reservation[]
 
   @@index([slug])
   @@index([categoryId])
   @@index([availability])
   @@index([featured])
   @@index([createdAt])
+  @@index([archived])
+  @@index([name])
 }
+
+// ─── Images ────────────────────────────────────────────────────
 
 model Image {
   id        String   @id @default(cuid())
@@ -132,13 +162,16 @@ model Image {
   publicId  String
   itemId    String
   item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  type      String   @default("Extra") // Cover, Front, Back, Packaging, Damage, Extra
+  type      String   @default("Extra") // Cover, Front, Back, Packaging, CloseUp, Damage, Extra
+  altText   String?
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([itemId])
 }
+
+// ─── Price History ─────────────────────────────────────────────
 
 model PriceHistory {
   id     String   @id @default(cuid())
@@ -150,6 +183,8 @@ model PriceHistory {
   notes  String?
 }
 
+// ─── Item Views ────────────────────────────────────────────────
+
 model ItemView {
   id        String   @id @default(cuid())
   itemId    String
@@ -157,6 +192,8 @@ model ItemView {
   viewedAt  DateTime @default(now())
   ipAddress String?
 }
+
+// ─── Legacy Sales ──────────────────────────────────────────────
 
 model Sale {
   id        String   @id @default(cuid())
@@ -168,7 +205,176 @@ model Sale {
   notes     String?
 }
 
-// Blog System Models
+// ─── Customers ─────────────────────────────────────────────────
+
+model Customer {
+  id           String        @id @default(cuid())
+  name         String
+  phone        String?
+  email        String?
+  address      String?       @db.Text
+  city         String?
+  state        String?
+  country      String?       @default("India")
+  pin          String?
+  gstNumber    String?
+  notes        String?       @db.Text
+  invoices     Invoice[]
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([name])
+  @@index([phone])
+  @@index([email])
+}
+
+// ─── Invoices ──────────────────────────────────────────────────
+
+model Invoice {
+  id              String   @id @default(cuid())
+  invoiceNumber   String   @unique  // NB57-INV-YYYYMM-XXXX
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id])
+
+  // Totals
+  subtotal        Float    @default(0)
+  taxPercent       Float?
+  taxAmount       Float    @default(0)
+  discountPercent  Float?
+  discountAmount  Float    @default(0)
+  shippingCharge  Float    @default(0)
+  packagingCharge Float    @default(0)
+  miscCharge      Float    @default(0)
+  grandTotal      Float    @default(0)
+
+  // Payment
+  paymentMethod   String?  // Cash, UPI, Bank
+  paymentStatus   String   @default("Draft") // Paid, Pending, Partial, Cancelled, Draft
+  amountPaid      Float    @default(0)
+
+  // Extras
+  notes           String?  @db.Text
+  trackingNumber  String?
+  courierName     String?
+
+  // Relations
+  items           InvoiceItem[]
+  ledgerEntries   LedgerEntry[]
+  timeline        InvoiceTimeline[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([invoiceNumber])
+  @@index([customerId])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+// ─── Invoice Items ─────────────────────────────────────────────
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  itemId      String
+  item        Item    @relation(fields: [itemId], references: [id])
+  quantity    Int     @default(1)
+  unitPrice   Float
+  totalPrice  Float
+
+  // Snapshots for historical accuracy
+  itemName    String
+  itemSku     String
+  itemCondition String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([itemId])
+}
+
+// ─── Reservations ──────────────────────────────────────────────
+
+model Reservation {
+  id              String   @id @default(cuid())
+  itemId          String
+  item            Item     @relation(fields: [itemId], references: [id])
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  customerName    String?  // For quick reservations without customer record
+  customerPhone   String?
+  reason          String?  @db.Text
+  deposit         Float    @default(0)
+  notes           String?  @db.Text
+  reservationDate DateTime @default(now())
+  expiryDate      DateTime // Default 48 hours from creation
+  status          String   @default("Active") // Active, Expired, Converted, Cancelled
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([itemId])
+  @@index([customerId])
+  @@index([status])
+  @@index([expiryDate])
+}
+
+// ─── Ledger ────────────────────────────────────────────────────
+
+model LedgerEntry {
+  id          String   @id @default(cuid())
+  invoiceId   String?
+  invoice     Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  type        String   // Revenue, InventoryCost, Shipping, Packaging, Misc, Profit, Refund, Deletion
+  amount      Float
+  description String
+  notes       String?  @db.Text
+  reversed    Boolean  @default(false)
+  reversedAt  DateTime?
+
+  createdAt   DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([reversed])
+}
+
+// ─── Invoice Timeline ──────────────────────────────────────────
+
+model InvoiceTimeline {
+  id        String   @id @default(cuid())
+  invoiceId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  event     String   // Created, Edited, Draft, Reserved, Paid, Downloaded, WhatsAppShared, Packed, Shipped, Delivered, Completed, Deleted
+  admin     String?
+  notes     String?  @db.Text
+  timestamp DateTime @default(now())
+
+  // Never overwritten — append only
+  @@index([invoiceId])
+  @@index([timestamp])
+}
+
+// ─── Activity Log ──────────────────────────────────────────────
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String   // Created, Updated, Deleted, StatusChanged, Exported, etc.
+  entity    String   // Item, Invoice, Customer, Reservation, Category, Blog, etc.
+  entityId  String?
+  details   String?  @db.Text // JSON string for detailed changes
+  admin     String?
+  timestamp DateTime @default(now())
+
+  @@index([entity])
+  @@index([timestamp])
+  @@index([entityId])
+}
+
+// ─── Blog System ───────────────────────────────────────────────
 
 model BlogCategory {
   id          String     @id @default(cuid())

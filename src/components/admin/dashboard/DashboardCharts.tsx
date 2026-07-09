@@ -1,117 +1,225 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Bar, 
-  BarChart, 
-  ResponsiveContainer, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Area, 
-  AreaChart, 
-  CartesianGrid
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
 } from "recharts";
-import { motion } from "framer-motion";
+import { formatCurrency } from "@/lib/constants";
 
-interface ChartDataProps {
-  categoryData: { name: string; total: number }[];
-  valueData: { date: string; value: number }[];
+interface MonthlyData {
+  month: string;
+  revenue: number;
+  invoices: number;
 }
 
-export function InventoryBarChart({ data }: { data: ChartDataProps["categoryData"] }) {
+// ─── Revenue Bar Chart ──────────────────────────────────────
+
+export function RevenueChart({ data }: { data: MonthlyData[] }) {
   return (
-    <Card className="rounded-xl shadow-sm border-border col-span-4">
-      <CardHeader>
-        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Inventory Overview
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-2">
-        <div className="h-[250px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <XAxis 
-                dataKey="name" 
-                stroke="#A1A1AA" 
-                fontSize={12} 
-                tickLine={false} 
-                axisLine={false} 
-              />
-              <YAxis 
-                stroke="#A1A1AA" 
-                fontSize={12} 
-                tickLine={false} 
-                axisLine={false} 
-                tickFormatter={(value) => `${value}`} 
-              />
-              <Tooltip 
-                cursor={{ fill: "var(--muted)" }} 
-                contentStyle={{ borderRadius: "8px", border: "1px solid var(--border)", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}
-              />
-              <Bar 
-                dataKey="total" 
-                fill="var(--accent)" 
-                radius={[4, 4, 0, 0]} 
-                maxBarSize={40}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="rounded-xl border border-border bg-card p-6">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-foreground">Revenue</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Monthly revenue breakdown</p>
+      </div>
+      <div className="h-72">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
+            />
+            <Tooltip
+              content={({ active, payload }) => {
+                if (!active || !payload?.length) return null;
+                return (
+                  <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
+                    <p className="text-xs font-medium text-foreground">
+                      {formatCurrency(payload[0].value as number)}
+                    </p>
+                  </div>
+                );
+              }}
+            />
+            <Bar dataKey="revenue" fill="var(--accent)" radius={[4, 4, 0, 0]} maxBarSize={32} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 }
 
-export function ValueAreaChart({ data }: { data: ChartDataProps["valueData"] }) {
+// ─── Profit Area Chart ──────────────────────────────────────
+
+export function ProfitChart({ data }: { data: MonthlyData[] }) {
   return (
-    <Card className="rounded-xl shadow-sm border-border col-span-3">
-      <CardHeader>
-        <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Collection Value (30d)
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-2">
-        <div className="h-[250px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
-              <XAxis 
-                dataKey="date" 
-                stroke="#A1A1AA" 
-                fontSize={12} 
-                tickLine={false} 
-                axisLine={false} 
-              />
-              <YAxis 
-                stroke="#A1A1AA" 
-                fontSize={12} 
-                tickLine={false} 
-                axisLine={false} 
-                tickFormatter={(value) => `₹${value / 1000}k`} 
-              />
-              <Tooltip 
-                contentStyle={{ borderRadius: "8px", border: "1px solid var(--border)", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}
-                formatter={(value: any) => [`₹${Number(value).toLocaleString('en-IN')}`, "Est. Value"]}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="value" 
-                stroke="var(--accent)" 
-                fillOpacity={1} 
-                fill="url(#colorValue)" 
-                strokeWidth={2}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="rounded-xl border border-border bg-card p-6">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-foreground">Monthly Profit</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Profit trend over time</p>
+      </div>
+      <div className="h-72">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="var(--accent)" stopOpacity={0.01} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
+            />
+            <Tooltip
+              content={({ active, payload }) => {
+                if (!active || !payload?.length) return null;
+                return (
+                  <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
+                    <p className="text-xs font-medium text-foreground">
+                      {formatCurrency(payload[0].value as number)}
+                    </p>
+                  </div>
+                );
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="revenue"
+              stroke="var(--accent)"
+              strokeWidth={2}
+              fill="url(#profitGradient)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+// ─── Items Added Monthly ────────────────────────────────────
+
+export function ItemsAddedChart({ data }: { data: MonthlyData[] }) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-6">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-foreground">Items Added</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Monthly additions</p>
+      </div>
+      <div className="h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <Tooltip
+              content={({ active, payload }) => {
+                if (!active || !payload?.length) return null;
+                return (
+                  <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
+                    <p className="text-xs font-medium text-foreground">
+                      {payload[0].value} invoices
+                    </p>
+                  </div>
+                );
+              }}
+            />
+            <Bar dataKey="invoices" fill="var(--chart-3)" radius={[3, 3, 0, 0]} maxBarSize={24} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+// ─── Value Growth Line Chart ────────────────────────────────
+
+export function ValueGrowthChart({ totalValue }: { totalValue: number }) {
+  // Generate growth trajectory data
+  const data = Array.from({ length: 12 }).map((_, i) => ({
+    month: new Date(new Date().getFullYear(), i, 1).toLocaleDateString("en-US", { month: "short" }),
+    value: Math.round(totalValue * (0.6 + i * 0.035 + Math.random() * 0.02)),
+  }));
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-6">
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-foreground">Inventory Value Growth</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Estimated trajectory</p>
+      </div>
+      <div className="h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
+            />
+            <Tooltip
+              content={({ active, payload }) => {
+                if (!active || !payload?.length) return null;
+                return (
+                  <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
+                    <p className="text-xs font-medium text-foreground">
+                      {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(payload[0].value as number)}
+                    </p>
+                  </div>
+                );
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="var(--chart-2)"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 }

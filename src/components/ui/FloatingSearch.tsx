@@ -32,12 +32,19 @@ export function FloatingSearch({ open, setOpen }: { open: boolean, setOpen: (ope
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Search collections, categories, items..." />
+      <CommandInput 
+        placeholder="Search collections, categories, items..." 
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+            runCommand(() => router.push(`/collection?q=${encodeURIComponent(e.currentTarget.value.trim())}`));
+          }
+        }}
+      />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Suggestions">
-          <CommandItem onSelect={() => runCommand(() => router.push('/collection?filter=pokemon'))}>
-            Pokemon Collection
+          <CommandItem onSelect={() => runCommand(() => router.push('/collection'))}>
+            All Collectibles
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => router.push('/collection?filter=bakugan'))}>
             Bakugan Collection
@@ -48,8 +55,8 @@ export function FloatingSearch({ open, setOpen }: { open: boolean, setOpen: (ope
           <CommandItem onSelect={() => runCommand(() => router.push('/collection?filter=sealed'))}>
             Factory Sealed Items
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => router.push('/collection'))}>
-            All Collectibles
+          <CommandItem onSelect={() => runCommand(() => router.push('/collection?filter=pokemon'))}>
+            Pokemon Collection
           </CommandItem>
         </CommandGroup>
       </CommandList>

@@ -89,11 +89,15 @@ export default async function CollectionItemPage({ params }: { params: Promise<{
           {/* Left Column: Gallery */}
           <div className="lg:col-span-7 space-y-6">
             <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative">
-              {item.sealed && (
+              {item.sealed ? (
                 <Badge className="absolute top-6 left-6 bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100 px-3 py-1 text-sm font-medium backdrop-blur-sm z-10">
                   Factory Sealed
                 </Badge>
-              )}
+              ) : item.condition ? (
+                <Badge className="absolute top-6 left-6 bg-white/90 text-slate-700 border-slate-200 hover:bg-white/90 px-3 py-1 text-sm font-medium backdrop-blur-sm shadow-sm z-10">
+                  {item.condition}
+                </Badge>
+              ) : null}
               <div className="absolute top-6 right-6 z-10">
                 {item.availability === 'Sold' ? (
                   <Badge variant="secondary" className="bg-slate-800/90 text-white border-transparent px-3 py-1 font-medium backdrop-blur-sm shadow-sm">Sold</Badge>

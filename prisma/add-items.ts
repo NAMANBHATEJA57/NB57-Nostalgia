@@ -102,7 +102,7 @@ async function main() {
         sku: sku,
         slug: itemData.slug,
         name: itemData.name,
-        description: `<p><strong>${itemData.shortDesc}</strong></p><p>${itemData.description}</p>`,
+        description: `${itemData.shortDesc} ${itemData.description}`,
         categoryId: category.id,
         condition: 'Played',
         quantity: itemData.quantity,

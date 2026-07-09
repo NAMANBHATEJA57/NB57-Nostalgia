@@ -108,3 +108,25 @@ export async function duplicateItem(id: string) {
     return { success: false, error: 'Failed to duplicate item' };
   }
 }
+
+export async function getAllItemsForExport() {
+  const session = await verifySession();
+  if (!session) return { success: false, error: 'Unauthorized' };
+
+  try {
+    const items = await prisma.item.findMany({
+      include: {
+        category: { select: { name: true } },
+        itemTags: { include: { tag: true } },
+        images: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    return { success: true, items };
+  } catch (error) {
+    console.error('Failed to fetch items for export:', error);
+    return { success: false, error: 'Failed to fetch items' };
+  }
+}

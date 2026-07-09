@@ -21,6 +21,9 @@ export async function updateItem(id: string, formData: FormData) {
   const description = formData.get('description') as string;
   const categoryId = formData.get('categoryId') as string;
   const coverImage = formData.get('coverImage') as string;
+  const series = formData.get('series') as string;
+  const sealedStr = formData.get('sealed') as string;
+  const sealed = sealedStr === 'true';
   
   const extraImagesJson = formData.get('extraImagesJson') as string;
   let extraImages: string[] = [];
@@ -44,7 +47,9 @@ export async function updateItem(id: string, formData: FormData) {
         availability,
         categoryId: categoryId || undefined,
         description,
-        coverImage
+        coverImage,
+        series: series || undefined,
+        sealed
       }
     }),
     prisma.image.deleteMany({

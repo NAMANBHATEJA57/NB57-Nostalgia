@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { deleteItem, deleteItems, duplicateItem } from "@/app/admin/items/actions";
+import { sortAlphabetically, sortConditions } from "@/lib/sort";
 import { 
   Table, 
   TableBody, 
@@ -18,25 +20,8 @@ import { Search, Filter, Edit, Trash, Copy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ItemsTableToolbar } from "./ItemsTableToolbar";
+import { ItemsTableDeleteDialog } from "./ItemsTableDeleteDialog";
 
 type ItemTableRow = {
   id: string;
@@ -61,8 +46,16 @@ interface ItemsTableProps {
 }
 
 export function ItemsTable({ items: initialItems, allCategories }: ItemsTableProps) {
+  const searchParams = useSearchParams();
   const [items, setItems] = useState(initialItems);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q !== null) {
+      setSearch(q);
+    }
+  }, [searchParams]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
@@ -123,9 +116,9 @@ export function ItemsTable({ items: initialItems, allCategories }: ItemsTablePro
     return matchesSearch && matchesCategory && matchesStatus && matchesCondition;
   });
 
-  const categories = allCategories || Array.from(new Set(items.map(item => item.category?.name || 'Uncategorized')));
+  const categories = sortAlphabetically(allCategories || Array.from(new Set(items.map(item => item.category?.name || 'Uncategorized'))));
   const statuses = ['Available', 'Reserved', 'Sold', 'Not for Sale'];
-  const conditions = Array.from(new Set(items.map(item => item.condition))).filter(Boolean) as string[];
+  const conditions = sortConditions(Array.from(new Set(items.map(item => item.condition))).filter(Boolean) as string[]);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -150,94 +143,22 @@ export function ItemsTable({ items: initialItems, allCategories }: ItemsTablePro
 
   return (
     <div className="bg-white border rounded-xl shadow-sm flex flex-col h-[calc(100vh-200px)]">
-      {/* Toolbar */}
-      <div className="p-4 border-b flex items-center justify-between gap-4 bg-slate-50/50 rounded-t-xl shrink-0">
-        <div className="flex-1 max-w-sm relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search by Name, SKU, Category..." 
-            className="pl-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          {selectedIds.length > 0 && (
-             <div className="flex items-center gap-2 mr-4 text-sm bg-primary/10 text-primary px-3 py-1.5 rounded-md">
-                <span className="font-medium">{selectedIds.length} selected</span>
-                <Button variant="ghost" size="sm" className="h-6 px-2 py-0 hover:bg-primary/20 hover:text-primary">Bulk Edit</Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-6 px-2 py-0 hover:bg-red-200 hover:text-red-700 text-red-600"
-                  onClick={() => setDeleteDialog({ open: true, type: 'bulk' })}
-                  disabled={isPending}
-                >
-                  Delete
-                </Button>
-             </div>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger className={buttonVariants({ variant: "outline", size: "sm" })}>
-              <Filter className="mr-2 h-4 w-4" />
-              Filters {(categoryFilter.length > 0 || statusFilter.length > 0 || conditionFilter.length > 0) && `(${categoryFilter.length + statusFilter.length + conditionFilter.length})`}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                {statuses.map(status => (
-                  <DropdownMenuCheckboxItem 
-                    key={status} 
-                    checked={statusFilter.includes(status)}
-                    onCheckedChange={(checked) => {
-                      if (checked) setStatusFilter([...statusFilter, status]);
-                      else setStatusFilter(statusFilter.filter(s => s !== status));
-                    }}
-                  >
-                    {status}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuGroup>
-              {statuses.length > 0 && <DropdownMenuSeparator />}
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
-                {categories.map(category => (
-                  <DropdownMenuCheckboxItem 
-                    key={category} 
-                    checked={categoryFilter.includes(category)}
-                    onCheckedChange={(checked) => {
-                      if (checked) setCategoryFilter([...categoryFilter, category]);
-                      else setCategoryFilter(categoryFilter.filter(c => c !== category));
-                    }}
-                  >
-                    {category}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuGroup>
-              {conditions.length > 0 && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>Filter by Condition</DropdownMenuLabel>
-                    {conditions.map(condition => (
-                      <DropdownMenuCheckboxItem 
-                        key={condition} 
-                        checked={conditionFilter.includes(condition)}
-                        onCheckedChange={(checked) => {
-                          if (checked) setConditionFilter([...conditionFilter, condition]);
-                          else setConditionFilter(conditionFilter.filter(c => c !== condition));
-                        }}
-                      >
-                        {condition}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                  </DropdownMenuGroup>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+      <ItemsTableToolbar 
+        search={search}
+        setSearch={setSearch}
+        selectedIdsLength={selectedIds.length}
+        isPending={isPending}
+        onBulkDeleteClick={() => setDeleteDialog({ open: true, type: 'bulk' })}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        categories={categories}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        statuses={statuses}
+        conditionFilter={conditionFilter}
+        setConditionFilter={setConditionFilter}
+        conditions={conditions}
+      />
       
       {/* Table Area (Scrollable) */}
       <div className="overflow-auto flex-1 relative">
@@ -345,35 +266,16 @@ export function ItemsTable({ items: initialItems, allCategories }: ItemsTablePro
         </div>
       </div>
 
-      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !isPending && setDeleteDialog({ ...deleteDialog, open })}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {deleteDialog.type === 'bulk' 
-                ? `This action cannot be undone. This will permanently delete ${selectedIds.length} items from the database.`
-                : `This action cannot be undone. This will permanently delete the item from the database.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={(e) => {
-                e.preventDefault();
-                if (deleteDialog.type === 'bulk') {
-                  handleBulkDelete();
-                } else if (deleteDialog.itemId) {
-                  handleDelete(deleteDialog.itemId);
-                }
-              }}
-              disabled={isPending}
-              className="bg-red-600 hover:bg-red-700 focus:ring-red-600 text-white"
-            >
-              {isPending ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ItemsTableDeleteDialog 
+        open={deleteDialog.open}
+        type={deleteDialog.type}
+        itemId={deleteDialog.itemId}
+        selectedIdsLength={selectedIds.length}
+        isPending={isPending}
+        onOpenChange={(open) => !isPending && setDeleteDialog({ ...deleteDialog, open })}
+        onConfirmBulk={handleBulkDelete}
+        onConfirmSingle={handleDelete}
+      />
     </div>
   );
 }
