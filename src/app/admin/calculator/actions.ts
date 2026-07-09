@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { createLedgerEntries } from "@/lib/activity";
 
 export async function searchItems(query: string) {
   if (!query || query.length < 2) return [];
@@ -184,6 +185,15 @@ export async function convertToInvoice(quoteId: string, customerId: string) {
     const invoiceNumber = `NB57-INV-${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`;
     const paymentStatus = quote.advancePaid >= quote.grandTotal && quote.grandTotal > 0 ? "Paid" : (quote.advancePaid > 0 ? "Partial" : "Draft");
 
+    // Get purchase prices for profit calc
+    const itemIds = quote.items.map((i) => i.itemId);
+    const itemRecords = await prisma.item.findMany({
+      where: { id: { in: itemIds } },
+      select: { id: true, purchasePrice: true },
+    });
+    const purchasePriceMap = new Map(itemRecords.map(i => [i.id, i.purchasePrice || 0]));
+    const totalPurchasePrice = quote.items.reduce((sum, item) => sum + (purchasePriceMap.get(item.itemId) || 0) * item.quantity, 0);
+
     const result = await prisma.$transaction(async (tx) => {
       // Create Invoice
       const invoice = await tx.invoice.create({
@@ -266,11 +276,26 @@ export async function convertToInvoice(quoteId: string, customerId: string) {
         }
       });
 
+      // Create ledger entries
+      await createLedgerEntries({
+        invoiceId: invoice.id,
+        revenue: quote.grandTotal,
+        inventoryCost: totalPurchasePrice,
+        shippingCharge: quote.shippingCharge,
+        packagingCharge: quote.packagingCharge,
+        miscCharge: quote.miscCharge,
+        tx,
+      });
+
       return invoice;
     });
 
     revalidatePath("/admin/calculator");
     revalidatePath("/admin/invoices");
+    revalidatePath("/admin/dashboard");
+    revalidatePath("/admin/ledger");
+    revalidatePath("/admin/profit");
+    revalidatePath("/admin/customers");
     revalidatePath("/");
     revalidatePath("/collection", "layout");
 
