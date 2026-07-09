@@ -239,22 +239,30 @@ export function CalculatorWorkspace({ initialQuote }: { initialQuote?: any }) {
           </div>
           {results.length > 0 && (
             <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">
-              {results.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-3 p-2 hover:bg-muted cursor-pointer"
-                  onClick={() => handleAddItem(item)}
-                >
-                  {item.coverImage && (
-                    <Image src={item.coverImage} alt={item.name} width={40} height={40} className="rounded object-cover" />
-                  )}
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">{item.name}</div>
-                    <div className="text-xs text-muted-foreground">{item.sku} | {item.condition}</div>
+              {results.map((item) => {
+                const isSold = item.availability === "Sold";
+                return (
+                  <div
+                    key={item.id}
+                    className={`flex items-center gap-3 p-2 ${isSold ? 'opacity-50 cursor-not-allowed bg-muted/50' : 'hover:bg-muted cursor-pointer'}`}
+                    onClick={() => {
+                      if (!isSold) handleAddItem(item);
+                    }}
+                  >
+                    {item.coverImage && (
+                      <Image src={item.coverImage} alt={item.name} width={40} height={40} className={`rounded object-cover ${isSold ? 'grayscale' : ''}`} />
+                    )}
+                    <div className="flex-1">
+                      <div className="font-medium text-sm flex items-center gap-2">
+                        {item.name}
+                        {isSold && <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-sm font-semibold">SOLD</span>}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{item.sku} | {item.condition}</div>
+                    </div>
+                    <div className="text-sm font-semibold">₹{item.askingPrice}</div>
                   </div>
-                  <div className="text-sm font-semibold">₹{item.askingPrice}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
