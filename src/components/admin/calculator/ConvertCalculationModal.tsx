@@ -109,7 +109,7 @@ export function ConvertCalculationModal({ isOpen, onClose, quoteData, onSuccess 
       
       if (convertResult.success) {
         toast.success("Successfully converted to invoice!");
-        setGeneratedInvoiceId(convertResult.invoiceId);
+        setGeneratedInvoiceId(convertResult.invoiceId ?? null);
         setStep(3); // Go to success step
         if (onSuccess) onSuccess();
       } else {
