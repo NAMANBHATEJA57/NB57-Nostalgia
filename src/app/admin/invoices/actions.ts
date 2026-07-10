@@ -209,107 +209,7 @@ export async function createInvoice(data: {
 
 // ─── Update Invoice ─────────────────────────────────────────
 
-export async function updateInvoice(
-  invoiceId: string,
-  data: {
-    subtotal: number;
-    taxPercent?: number | null;
-    taxAmount: number;
-    discountPercent?: number | null;
-    discountAmount: number;
-    shippingCharge: number;
-    packagingCharge: number;
-    miscCharge: number;
-    grandTotal: number;
-    paymentMethod?: string | null;
-    paymentStatus: string;
-    amountPaid: number;
-    notes?: string | null;
-    trackingNumber?: string | null;
-    courierName?: string | null;
-  }
-) {
-  const session = await verifySession();
-  if (!session) return { success: false, error: 'Unauthorized' };
 
-  try {
-    const invoice = await prisma.invoice.update({
-      where: { id: invoiceId },
-      data: {
-        subtotal: data.subtotal,
-        taxPercent: data.taxPercent || null,
-        taxAmount: data.taxAmount,
-        discountPercent: data.discountPercent || null,
-        discountAmount: data.discountAmount,
-        shippingCharge: data.shippingCharge,
-        packagingCharge: data.packagingCharge,
-        miscCharge: data.miscCharge,
-        grandTotal: data.grandTotal,
-        paymentMethod: data.paymentMethod || null,
-        paymentStatus: data.paymentStatus,
-        amountPaid: data.amountPaid,
-        notes: data.notes || null,
-        trackingNumber: data.trackingNumber || null,
-        courierName: data.courierName || null,
-      },
-      include: { items: true },
-    });
-
-    if (data.paymentStatus === "Paid") {
-      for (const item of invoice.items) {
-        await prisma.item.update({
-          where: { id: item.itemId },
-          data: {
-            availability: "Sold",
-            soldPrice: item.unitPrice,
-            soldDate: new Date(),
-          },
-        });
-      }
-    } else if (["Draft", "Partial", "Pending"].includes(data.paymentStatus)) {
-      for (const item of invoice.items) {
-        await prisma.item.update({
-          where: { id: item.itemId },
-          data: {
-            availability: "Reserved",
-          },
-        });
-      }
-    } else if (data.paymentStatus === "Cancelled") {
-      for (const item of invoice.items) {
-        await prisma.item.update({
-          where: { id: item.itemId },
-          data: {
-            availability: "Available",
-          },
-        });
-      }
-    }
-
-    await logInvoiceTimeline({
-      invoiceId,
-      event: "Edited",
-      notes: `Invoice updated`,
-    });
-
-    await logActivity({
-      action: "Updated",
-      entity: "Invoice",
-      entityId: invoiceId,
-    });
-
-    revalidatePath('/admin/invoices');
-    revalidatePath(`/admin/invoices/${invoiceId}`);
-    revalidatePath('/admin/dashboard');
-    revalidatePath('/');
-    revalidatePath('/collection', 'layout');
-
-    return { success: true, invoice };
-  } catch (error) {
-    console.error('Failed to update invoice:', error);
-    return { success: false, error: 'Failed to update invoice' };
-  }
-}
 
 // ─── Update Payment Status ──────────────────────────────────
 
@@ -460,72 +360,11 @@ export async function addTimelineEvent(invoiceId: string, event: string, notes?:
 
 // ─── Search Items for Invoice ───────────────────────────────
 
-export async function searchItemsForInvoice(query: string) {
-  const session = await verifySession();
-  if (!session) return { success: false, error: 'Unauthorized', items: [] };
 
-  try {
-    const items = await prisma.item.findMany({
-      where: {
-        AND: [
-          { availability: "Available" },
-          {
-            OR: [
-              { name: { contains: query, mode: 'insensitive' } },
-              { sku: { contains: query, mode: 'insensitive' } },
-              { character: { contains: query, mode: 'insensitive' } },
-              { series: { contains: query, mode: 'insensitive' } },
-            ],
-          },
-        ],
-      },
-      take: 20,
-      select: {
-        id: true,
-        name: true,
-        sku: true,
-        coverImage: true,
-        askingPrice: true,
-        purchasePrice: true,
-        condition: true,
-        quantity: true,
-        category: { select: { name: true } },
-      },
-      orderBy: { name: 'asc' },
-    });
-
-    return { success: true, items };
-  } catch (error) {
-    console.error('Failed to search items:', error);
-    return { success: false, error: 'Failed to search items', items: [] };
-  }
-}
 
 // ─── Search/Create Customers ────────────────────────────────
 
-export async function searchCustomers(query: string) {
-  const session = await verifySession();
-  if (!session) return { success: false, error: 'Unauthorized', customers: [] };
 
-  try {
-    const customers = await prisma.customer.findMany({
-      where: {
-        OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { phone: { contains: query, mode: 'insensitive' } },
-          { email: { contains: query, mode: 'insensitive' } },
-        ],
-      },
-      take: 10,
-      orderBy: { name: 'asc' },
-    });
-
-    return { success: true, customers };
-  } catch (error) {
-    console.error('Failed to search customers:', error);
-    return { success: false, error: 'Failed to search customers', customers: [] };
-  }
-}
 
 export async function createCustomer(data: {
   name: string;

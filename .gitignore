@@ -44,3 +44,14 @@ next-env.d.ts
 NB57_20_Blog_Articles.csv
 NB57_Nostalgia_Master_Inventory_v1.csv
 NB57_Blog_Seed_Content.csv
+
+# scripts and temp code
+/scripts/*.ts
+/scripts/*.js
+/prisma/*.ts
+!/prisma/seed.ts
+update-prices.ts
+delete_customer.ts
+list_customers.ts
+check-status.js
+fix-ledger.js

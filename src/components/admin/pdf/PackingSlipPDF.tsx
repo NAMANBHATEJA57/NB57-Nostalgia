@@ -172,9 +172,8 @@ export const PackingSlipPDF: React.FC<PackingSlipPDFProps> = ({ invoice, logoUrl
           <View style={styles.addressBox}>
             <Text style={styles.sectionTitle}>Return Address</Text>
             <Text style={styles.customerName}>NB57's Nostalgia</Text>
-            <Text style={styles.detailText}>Professor Oak's Laboratory</Text>
-            <Text style={styles.detailText}>Pallet Town</Text>
-            <Text style={styles.detailText}>Kanto Region</Text>
+            <Text style={styles.detailText}>BC-2 West, Shalimar bagh</Text>
+            <Text style={styles.detailText}>Delhi-110088</Text>
           </View>
         </View>
 

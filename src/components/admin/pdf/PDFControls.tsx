@@ -5,10 +5,11 @@ import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';
 import { InvoicePDF } from './InvoicePDF';
 import { PackingSlipPDF } from './PackingSlipPDF';
+import { PackingSlipHTML } from './PackingSlipHTML';
 import { ShippingLabelPDF } from './ShippingLabelPDF';
 import { addTimelineEvent } from '@/app/admin/invoices/actions';
 import { toast } from 'sonner';
-import { FileText, Download, Printer, Box, Mail } from 'lucide-react';
+import { FileText, Download, Printer, Box, Mail, Image as ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog';
 
 interface PDFControlsProps {
@@ -19,15 +20,38 @@ interface PDFControlsProps {
 
 export const PDFControls: React.FC<PDFControlsProps> = ({ invoice, logoUrl, qrCodeUrl }) => {
   const [isClient, setIsClient] = useState(false);
+  const [generatingPng, setGeneratingPng] = useState(false);
+  const packingSlipRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   const handleDownloadLog = async (type: string) => {
-    const res = await addTimelineEvent(invoice.id, 'Downloaded', `${type} PDF Downloaded`);
+    const res = await addTimelineEvent(invoice.id, 'Downloaded', `${type} Downloaded`);
     if (res.success) {
       toast.success(`${type} download logged.`);
+    }
+  };
+
+  const handleDownloadPackingSlipPNG = async () => {
+    if (!packingSlipRef.current) return;
+    setGeneratingPng(true);
+    try {
+      const { toPng } = await import('html-to-image');
+      const dataUrl = await toPng(packingSlipRef.current, { quality: 1, pixelRatio: 2 });
+      
+      const link = document.createElement('a');
+      link.download = `PackingSlip_${invoice.invoiceNumber}.png`;
+      link.href = dataUrl;
+      link.click();
+      
+      await handleDownloadLog('Packing Slip PNG');
+    } catch (err) {
+      console.error('Failed to generate PNG', err);
+      toast.error('Failed to generate PNG');
+    } finally {
+      setGeneratingPng(false);
     }
   };
 
@@ -88,19 +112,15 @@ export const PDFControls: React.FC<PDFControlsProps> = ({ invoice, logoUrl, qrCo
         </DialogContent>
       </Dialog>
 
-      <PDFDownloadLink document={packingDoc} fileName={`PackingSlip_${invoice.invoiceNumber}.pdf`}>
-        {({ loading }) => (
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            disabled={loading}
-            onClick={() => handleDownloadLog('Packing Slip')}
-          >
-            <Download className="w-4 h-4" /> {loading ? 'Generating...' : 'Download Packing Slip'}
-          </Button>
-        )}
-      </PDFDownloadLink>
+      <Button
+        variant="outline"
+        size="sm"
+        className="flex items-center gap-2"
+        disabled={generatingPng}
+        onClick={handleDownloadPackingSlipPNG}
+      >
+        <ImageIcon className="w-4 h-4" /> {generatingPng ? 'Generating...' : 'Download Packing Slip (PNG)'}
+      </Button>
 
       {/* SHIPPING LABEL CONTROLS */}
       <PDFDownloadLink document={labelDoc} fileName={`Label_${invoice.invoiceNumber}.pdf`}>
@@ -117,6 +137,10 @@ export const PDFControls: React.FC<PDFControlsProps> = ({ invoice, logoUrl, qrCo
         )}
       </PDFDownloadLink>
       
+      {/* Hidden element for PNG generation */}
+      <div className="absolute top-[-9999px] left-[-9999px]">
+        <PackingSlipHTML ref={packingSlipRef} invoice={invoice} logoUrl={logoUrl} />
+      </div>
     </div>
   );
 };
