@@ -236,7 +236,7 @@ export function ItemsTable({ items: initialItems, allCategories }: ItemsTablePro
                   <TableCell className="text-center">
                     <Select 
                       value={item.availability} 
-                      onValueChange={(value) => handleStatusChange(item.id, value)}
+                      onValueChange={(value) => { if (value) handleStatusChange(item.id, value); }}
                       disabled={isPending || item.availability === "Sold"}
                     >
                       <SelectTrigger className={`w-[120px] h-8 text-xs mx-auto border-transparent shadow-none [&>span]:line-clamp-1 ${
