@@ -4,7 +4,7 @@ import { useInterestedItems } from "@/components/context/InterestedItemsContext"
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Trash2, AlertCircle } from "lucide-react";
+import { Trash2, AlertCircle, Copy, Share, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createLead } from "./actions";
 import { toast } from "sonner";
@@ -14,6 +14,8 @@ export function InquiryWorkspace() {
   const [mounted, setMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inquirySent, setInquirySent] = useState(false);
+  const [generatedMessage, setGeneratedMessage] = useState("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -49,9 +51,6 @@ export function InquiryWorkspace() {
     if (result.success) {
       setInquirySent(true);
       
-      // Generate WhatsApp Message
-      const waNumber = "919811535385";
-      
       let message = `━━━━━━━━━━━━━━━━━━\nHello NB57's Nostalgia 👋\nI am interested in the following collectibles.\n━━━━━━━━━━━━━━━━━━\n\n`;
       
       availableItems.forEach((item, index) => {
@@ -66,8 +65,7 @@ export function InquiryWorkspace() {
       
       message += `Could you please confirm availability and final pricing?\nThank you!\n━━━━━━━━━━━━━━━━━━`;
 
-      const encodedMessage = encodeURIComponent(message);
-      window.open(`https://wa.me/${waNumber}?text=${encodedMessage}`, '_blank');
+      setGeneratedMessage(message);
       
     } else {
       toast.error(result.error);
@@ -92,23 +90,57 @@ export function InquiryWorkspace() {
     );
   }
 
+  const handleCopyMessage = () => {
+    navigator.clipboard.writeText(generatedMessage);
+    setCopied(true);
+    toast.success("Message copied to clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareMessage = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: "My Inquiry for NB57's Nostalgia",
+        text: generatedMessage
+      }).catch(console.error);
+    } else {
+      handleCopyMessage();
+    }
+  };
+
   if (inquirySent) {
     return (
-      <div className="max-w-7xl mx-auto px-6 text-center py-32">
+      <div className="max-w-4xl mx-auto px-6 text-center py-20">
         <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg className="w-10 h-10 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="font-cormorant text-4xl font-bold text-slate-900 mb-4">Inquiry Sent Successfully</h2>
-        <p className="text-slate-500 mb-8 max-w-md mx-auto">
-          We have generated your WhatsApp inquiry. A member of our team will review your selection and confirm availability.
+        <h2 className="font-cormorant text-4xl font-bold text-slate-900 mb-4">Inquiry Generated Successfully</h2>
+        <p className="text-slate-500 mb-8 max-w-xl mx-auto">
+          Your inquiry has been generated. Please copy the message below to send to our team or share it directly.
         </p>
-        <div className="flex justify-center gap-4">
-          <Button variant="outline" size="lg" onClick={() => clearItems()} className="rounded-full h-12">
+
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-left mb-8 whitespace-pre-wrap text-sm font-mono text-slate-700 shadow-inner">
+          {generatedMessage}
+        </div>
+
+        <div className="flex flex-col sm:flex-row justify-center gap-4">
+          <Button onClick={handleCopyMessage} size="lg" className="rounded-full h-12 bg-slate-900 px-8">
+            {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+            {copied ? 'Copied!' : 'Copy Message'}
+          </Button>
+          <Button onClick={handleShareMessage} variant="outline" size="lg" className="rounded-full h-12 border-slate-300 px-8">
+            <Share className="w-4 h-4 mr-2" />
+            Share Message
+          </Button>
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-slate-100 flex justify-center gap-4">
+          <Button variant="ghost" onClick={() => clearItems()} className="text-slate-500 hover:text-slate-900">
             Clear Interested Items
           </Button>
-          <Button render={<Link href="/collection" />} size="lg" className="rounded-full bg-slate-900 h-12">
+          <Button variant="link" render={<Link href="/collection" />} className="text-blue-600">
             Continue Browsing
           </Button>
         </div>
@@ -202,8 +234,8 @@ export function InquiryWorkspace() {
             </div>
 
             <div className="pt-8 border-t border-slate-100">
-              <Button onClick={onSubmit} size="lg" disabled={isSubmitting || availableItems.length === 0} className="w-full rounded-full h-14 bg-emerald-600 hover:bg-emerald-700 text-base font-medium mt-4 shadow-lg shadow-emerald-900/20">
-                {isSubmitting ? 'Generating...' : 'Send to WhatsApp'}
+              <Button onClick={onSubmit} size="lg" disabled={isSubmitting || availableItems.length === 0} className="w-full rounded-full h-14 bg-slate-900 hover:bg-blue-600 text-base font-medium mt-4 shadow-lg shadow-slate-900/20">
+                {isSubmitting ? 'Generating...' : 'Submit Inquiry'}
               </Button>
             </div>
           </div>

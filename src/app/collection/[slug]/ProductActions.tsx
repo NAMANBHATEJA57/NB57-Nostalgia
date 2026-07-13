@@ -74,26 +74,28 @@ export function ProductActions({ item }: { item: any }) {
         </Button>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <Button 
-          variant="outline" 
-          size="lg"
-          onClick={handleShare}
-          className="rounded-full border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 h-12"
-        >
-          <Share className="w-4 h-4 mr-2" />
-          Share
-        </Button>
-        <Button 
-          variant="outline" 
-          size="lg"
-          onClick={handleCopyLink}
-          className="rounded-full border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 h-12"
-        >
-          {copied ? <Check className="w-4 h-4 mr-2 text-emerald-500" /> : <LinkIcon className="w-4 h-4 mr-2" />}
-          {copied ? 'Copied!' : 'Copy Link'}
-        </Button>
-      </div>
+      {item.availability === 'Available' && (
+        <div className="grid grid-cols-2 gap-4">
+          <Button 
+            variant="outline" 
+            size="lg"
+            onClick={handleShare}
+            className="rounded-full border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 h-12"
+          >
+            <Share className="w-4 h-4 mr-2" />
+            Share
+          </Button>
+          <Button 
+            variant="outline" 
+            size="lg"
+            onClick={handleCopyLink}
+            className="rounded-full border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 h-12"
+          >
+            {copied ? <Check className="w-4 h-4 mr-2 text-emerald-500" /> : <LinkIcon className="w-4 h-4 mr-2" />}
+            {copied ? 'Copied!' : 'Copy Link'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

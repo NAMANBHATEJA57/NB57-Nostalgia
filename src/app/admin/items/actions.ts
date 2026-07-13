@@ -24,6 +24,27 @@ export async function deleteItem(id: string) {
   }
 }
 
+export async function updateItemStatus(id: string, availability: string) {
+  const session = await verifySession();
+  if (!session) return { success: false, error: 'Unauthorized' };
+
+  try {
+    const item = await prisma.item.update({
+      where: { id },
+      data: { availability }
+    });
+
+    revalidatePath('/');
+    revalidatePath('/admin/items');
+    revalidatePath('/admin/dashboard');
+    revalidatePath('/collection');
+    return { success: true, item };
+  } catch (error) {
+    console.error('Failed to update item status:', error);
+    return { success: false, error: 'Failed to update item status' };
+  }
+}
+
 export async function deleteItems(ids: string[]) {
   const session = await verifySession();
   if (!session) return { success: false, error: 'Unauthorized' };

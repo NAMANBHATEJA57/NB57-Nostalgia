@@ -79,8 +79,8 @@ export default function DemoItemPage() {
             </div>
 
             {/* CTA */}
-            <Button size="lg" className="rounded-full w-full py-7 text-lg font-semibold shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all">
-              Inquire on WhatsApp
+            <Button size="lg" className="rounded-full w-full py-7 text-lg font-semibold shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all bg-slate-900 text-white hover:bg-slate-800">
+              Add to Interested Items
             </Button>
           </div>
         </div>

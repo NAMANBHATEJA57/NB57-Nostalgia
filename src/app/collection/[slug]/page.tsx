@@ -104,6 +104,8 @@ export default async function CollectionItemPage({ params }: { params: Promise<{
                   <Badge variant="secondary" className="bg-slate-800/90 text-white border-transparent px-3 py-1 font-medium backdrop-blur-sm shadow-sm">Sold</Badge>
                 ) : item.availability === 'Reserved' ? (
                   <Badge variant="secondary" className="bg-yellow-500/90 text-white border-transparent px-3 py-1 font-medium backdrop-blur-sm shadow-sm">Reserved</Badge>
+                ) : (item.availability === 'Not For Sale' || item.availability === 'Not for Sale') ? (
+                  <Badge variant="secondary" className="bg-slate-600/90 text-white border-transparent px-3 py-1 font-medium backdrop-blur-sm shadow-sm">Not For Sale</Badge>
                 ) : (
                   <Badge variant="secondary" className="bg-emerald-500/90 text-white border-transparent px-3 py-1 font-medium backdrop-blur-sm shadow-sm">Available</Badge>
                 )}

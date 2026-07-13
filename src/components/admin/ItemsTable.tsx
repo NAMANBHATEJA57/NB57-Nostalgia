@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { deleteItem, deleteItems, duplicateItem } from "@/app/admin/items/actions";
+import { deleteItem, deleteItems, duplicateItem, updateItemStatus } from "@/app/admin/items/actions";
 import { sortAlphabetically, sortConditions } from "@/lib/sort";
 import { 
   Table, 
@@ -20,6 +20,7 @@ import { Search, Filter, Edit, Trash, Copy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ItemsTableToolbar } from "./ItemsTableToolbar";
 import { ItemsTableDeleteDialog } from "./ItemsTableDeleteDialog";
 
@@ -71,6 +72,21 @@ export function ItemsTable({ items: initialItems, allCategories }: ItemsTablePro
         setItems([result.item as ItemTableRow, ...items]);
       } else {
         toast.error(result.error || "Failed to duplicate item");
+      }
+    });
+  };
+
+  const handleStatusChange = (id: string, newStatus: string) => {
+    const previousItems = [...items];
+    setItems(prev => prev.map(item => item.id === id ? { ...item, availability: newStatus } : item));
+    
+    startTransition(async () => {
+      const result = await updateItemStatus(id, newStatus);
+      if (result.success) {
+        toast.success("Status updated");
+      } else {
+        toast.error(result.error || "Failed to update status");
+        setItems(previousItems);
       }
     });
   };
@@ -218,9 +234,27 @@ export function ItemsTable({ items: initialItems, allCategories }: ItemsTablePro
                     {formatPrice(item.fairValueMax ?? null)}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant={item.availability === "Sold" ? "destructive" : item.availability === "Available" ? "default" : "secondary"}>
-                      {item.availability}
-                    </Badge>
+                    <Select 
+                      value={item.availability} 
+                      onValueChange={(value) => handleStatusChange(item.id, value)}
+                      disabled={isPending || item.availability === "Sold"}
+                    >
+                      <SelectTrigger className={`w-[120px] h-8 text-xs mx-auto border-transparent shadow-none [&>span]:line-clamp-1 ${
+                        item.availability === "Sold" ? "bg-red-50 text-red-700 hover:bg-red-100" : 
+                        item.availability === "Available" ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : 
+                        item.availability === "Reserved" ? "bg-amber-50 text-amber-700 hover:bg-amber-100" :
+                        "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      }`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statuses.map(status => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
