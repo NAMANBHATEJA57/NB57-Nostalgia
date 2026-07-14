@@ -97,8 +97,6 @@ export function CalculatorWorkspace({ initialQuote }: { initialQuote?: any }) {
       quantity: 1,
       coverImage: item.coverImage,
     }]);
-    setQuery("");
-    setResults([]);
   };
 
   const updateItem = (id: string, field: keyof SelectedItem, value: any) => {
@@ -234,32 +232,65 @@ export function CalculatorWorkspace({ initialQuote }: { initialQuote?: any }) {
               placeholder="Search items by Name, SKU, Character, Series..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="pl-9 h-10"
+              className="pl-9 h-10 pr-9"
             />
+            {query && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1 h-8 w-8 text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setQuery("");
+                  setResults([]);
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
           {results.length > 0 && (
             <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">
               {results.map((item) => {
                 const isSold = item.availability === "Sold";
+                const isNotForSale = item.availability?.toLowerCase() === "not for sale";
+                const isAdded = selectedItems.some((i) => i.itemId === item.id);
+                const isDisabled = isSold || isNotForSale || isAdded;
+
                 return (
                   <div
                     key={item.id}
-                    className={`flex items-center gap-3 p-2 ${isSold ? 'opacity-50 cursor-not-allowed bg-muted/50' : 'hover:bg-muted cursor-pointer'}`}
-                    onClick={() => {
-                      if (!isSold) handleAddItem(item);
-                    }}
+                    className={`flex items-center gap-3 p-2 ${isSold || isNotForSale ? 'opacity-50 bg-muted/50' : 'hover:bg-muted'}`}
                   >
                     {item.coverImage && (
-                      <Image src={item.coverImage} alt={item.name} width={40} height={40} className={`rounded object-cover ${isSold ? 'grayscale' : ''}`} />
+                      <Image src={item.coverImage} alt={item.name} width={40} height={40} className={`rounded object-cover ${isSold || isNotForSale ? 'grayscale' : ''}`} />
                     )}
                     <div className="flex-1">
                       <div className="font-medium text-sm flex items-center gap-2">
                         {item.name}
                         {isSold && <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-sm font-semibold">SOLD</span>}
+                        {isNotForSale && <span className="text-[10px] bg-muted-foreground/10 text-muted-foreground px-1.5 py-0.5 rounded-sm font-semibold">NOT FOR SALE</span>}
                       </div>
                       <div className="text-xs text-muted-foreground">{item.sku} | {item.condition}</div>
                     </div>
-                    <div className="text-sm font-semibold">₹{item.askingPrice}</div>
+                    <div className="text-sm font-semibold flex items-center gap-3">
+                      ₹{item.askingPrice}
+                      {isAdded ? (
+                        <span className="text-[10px] font-bold text-green-600 bg-green-100 px-1.5 py-0.5 rounded-sm">ADDED</span>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          disabled={isDisabled}
+                          onClick={() => {
+                            if (!isDisabled) handleAddItem(item);
+                          }}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
