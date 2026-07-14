@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit2, Copy, Trash2, ArrowRightLeft } from "lucide-react";
 import Link from "next/link";
-import { deleteQuote } from "../actions";
+import { revalidatePath } from "next/cache";
 
 export default async function SavedQuotesPage() {
   const quotes = await prisma.quote.findMany({
@@ -68,6 +68,7 @@ export default async function SavedQuotesPage() {
                       <form action={async () => {
                         "use server";
                         await prisma.quote.delete({ where: { id: quote.id } });
+                        revalidatePath("/admin/calculator/saved");
                       }}>
                         <Button type="submit" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
                           <Trash2 className="h-4 w-4" />

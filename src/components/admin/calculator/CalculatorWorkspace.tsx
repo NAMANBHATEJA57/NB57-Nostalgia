@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ConvertCalculationModal } from "./ConvertCalculationModal";
+import { format } from "date-fns";
 
 interface SelectedItem {
   itemId: string;
@@ -160,7 +161,7 @@ export function CalculatorWorkspace({ initialQuote }: { initialQuote?: any }) {
       toast.success("Quote saved successfully");
       // Update ID if it's a new quote being saved
       if (!initialQuote?.id && result.quoteId) {
-        router.replace(`/admin/calculator/${result.quoteId}`);
+        router.replace(`/admin/calculator?id=${result.quoteId}`);
       }
     } else {
       toast.error(result.error);
@@ -483,7 +484,7 @@ export function CalculatorWorkspace({ initialQuote }: { initialQuote?: any }) {
           </div>
           <div className="text-right">
             <div className="text-sm font-semibold text-muted-foreground">Date:</div>
-            <div>{new Date().toLocaleDateString()}</div>
+            <div>{format(new Date(), "dd/MM/yyyy")}</div>
             {quoteTitle && <div className="mt-2 font-medium">{quoteTitle}</div>}
           </div>
         </div>
